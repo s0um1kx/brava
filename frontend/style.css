@@ -93,6 +93,28 @@ html, body {
   min-height: 20px;
 }
 
+.transcript-area {
+  width: 100%;
+  max-width: 420px;
+  min-height: 72px;
+  padding: 0 8px;
+}
+
+.transcript {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.5;
+  color: var(--ink);
+  text-align: center;
+  word-wrap: break-word;
+}
+
+.transcript:empty::before {
+  content: "Your words will appear here";
+  color: var(--ink-dim);
+  font-size: 14px;
+}
+
 .footer-note {
   padding-bottom: 8px;
 }
