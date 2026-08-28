@@ -13,6 +13,13 @@ const transcriptCleanEl = document.getElementById("transcript-clean");
 const markdownArea = document.getElementById("markdown-area");
 const markdownPreview = document.getElementById("markdown-preview");
 const downloadBtn = document.getElementById("download-btn");
+const saveBtn = document.getElementById("save-btn");
+const saveStatus = document.getElementById("save-status");
+
+// Point this at your backend. On your phone testing over the network,
+// "localhost" won't reach your laptop — see README for the mixed-content
+// note about HTTPS frontend + HTTP backend.
+const BACKEND_URL = window.BRAVA_BACKEND_URL || "http://localhost:3000";
 
 let currentMarkdown = null;
 
@@ -51,6 +58,7 @@ function startRecording() {
   transcriptCleanEl.textContent = "";
   markdownArea.hidden = true;
   currentMarkdown = null;
+  saveStatus.textContent = "";
 
   recognition = new SpeechRecognition();
   recognition.lang = "en-US";
@@ -139,4 +147,29 @@ downloadBtn.addEventListener("click", () => {
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
+});
+
+saveBtn.addEventListener("click", async () => {
+  if (!currentMarkdown) return;
+
+  saveStatus.textContent = "Saving…";
+
+  try {
+    const response = await fetch(`${BACKEND_URL}/api/ideas`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(currentMarkdown),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Save failed.");
+    }
+
+    saveStatus.textContent = `Saved as ${data.filename}`;
+  } catch (err) {
+    console.error("Save error:", err);
+    saveStatus.textContent = "Couldn't reach the server — is the backend running?";
+  }
 });
