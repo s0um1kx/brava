@@ -21,13 +21,14 @@ const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecogni
 let recognition = null;
 let isRecording = false;
 let finalTranscript = "";
+let latestFullText = "";
 
 function setStatus(text) {
   statusLine.textContent = text;
 }
 
 function finalizeCapture() {
-  const raw = finalTranscript.trim();
+  const raw = latestFullText.trim();
   const cleaned = window.BravaCleanup ? window.BravaCleanup.cleanTranscript(raw) : raw;
   transcriptCleanEl.textContent = cleaned;
 
@@ -45,6 +46,7 @@ function finalizeCapture() {
 
 function startRecording() {
   finalTranscript = "";
+  latestFullText = "";
   transcriptEl.textContent = "";
   transcriptCleanEl.textContent = "";
   markdownArea.hidden = true;
@@ -66,6 +68,7 @@ function startRecording() {
       }
     }
     transcriptEl.textContent = (finalTranscript + interim).trim();
+    latestFullText = finalTranscript + interim;
   };
 
   recognition.onerror = (event) => {
