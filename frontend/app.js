@@ -9,6 +9,7 @@ if ("serviceWorker" in navigator) {
 const captureBtn = document.getElementById("capture-btn");
 const statusLine = document.getElementById("status-line");
 const transcriptEl = document.getElementById("transcript");
+const transcriptCleanEl = document.getElementById("transcript-clean");
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -23,6 +24,7 @@ function setStatus(text) {
 function startRecording() {
   finalTranscript = "";
   transcriptEl.textContent = "";
+  transcriptCleanEl.textContent = "";
 
   recognition = new SpeechRecognition();
   recognition.lang = "en-US";
@@ -55,10 +57,12 @@ function startRecording() {
   };
 
   recognition.onend = () => {
-    // If the browser auto-stops (e.g. long silence) while we still think we're recording,
-    // reflect that in the UI rather than leaving a stale "Listening…" status.
     if (isRecording) {
       stopRecordingUI();
+      const cleaned = window.BravaCleanup
+        ? window.BravaCleanup.cleanTranscript(finalTranscript.trim())
+        : finalTranscript.trim();
+      transcriptCleanEl.textContent = cleaned;
       setStatus(finalTranscript.trim() ? "Captured — tap to speak again" : "Tap to speak");
     }
   };
@@ -74,6 +78,12 @@ function stopRecording() {
     recognition.stop();
   }
   stopRecordingUI();
+
+  const cleaned = window.BravaCleanup
+    ? window.BravaCleanup.cleanTranscript(finalTranscript.trim())
+    : finalTranscript.trim();
+  transcriptCleanEl.textContent = cleaned;
+
   setStatus(finalTranscript.trim() ? "Captured — tap to speak again" : "Tap to speak");
 }
 

@@ -5,7 +5,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-// Health check — confirms the server is alive before Milestone 5 adds real storage endpoints.
+// Health check — confirms the server is alive before real storage endpoints are added.
 app.get("/health", (req, res) => {
   res.json({ status: "ok", service: "brava-backend", version: "0.1.0" });
 });

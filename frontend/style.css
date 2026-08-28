@@ -96,23 +96,43 @@ html, body {
 .transcript-area {
   width: 100%;
   max-width: 420px;
-  min-height: 72px;
   padding: 0 8px;
+}
+
+.transcript-label {
+  margin: 12px 0 4px;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  text-align: center;
+}
+
+.transcript-label:first-child {
+  margin-top: 0;
 }
 
 .transcript {
   margin: 0;
-  font-size: 17px;
+  font-size: 16px;
   line-height: 1.5;
-  color: var(--ink);
   text-align: center;
   word-wrap: break-word;
 }
 
-.transcript:empty::before {
-  content: "Your words will appear here";
+.transcript-raw {
   color: var(--ink-dim);
-  font-size: 14px;
+}
+
+.transcript-clean {
+  color: var(--ink);
+  font-size: 18px;
+}
+
+.transcript:empty::before {
+  content: "—";
+  color: var(--ink-dim);
+  opacity: 0.4;
 }
 
 .footer-note {

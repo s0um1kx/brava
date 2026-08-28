@@ -22,14 +22,18 @@
     </section>
 
     <section class="transcript-area" aria-live="polite">
-      <p id="transcript" class="transcript"></p>
+      <p class="transcript-label">Raw</p>
+      <p id="transcript" class="transcript transcript-raw"></p>
+      <p class="transcript-label">Cleaned</p>
+      <p id="transcript-clean" class="transcript transcript-clean"></p>
     </section>
 
     <footer class="footer-note">
-      <span id="build-tag">v0.1 — milestone 2: raw transcription</span>
+      <span id="build-tag">v0.1 — milestone 3: filler-word cleanup</span>
     </footer>
   </main>
 
+  <script src="cleanup.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

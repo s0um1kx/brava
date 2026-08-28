@@ -11,12 +11,16 @@ for you — cleaned up and structured — the next time you sit down at your lap
 - Filler words ("um", "like", "so basically") stripped before saving
 - Output is a structured `.md` file per idea
 
+> Note: Web Speech API struggles with quiet/whispered speech. A local
+> Whisper-based upgrade (free, self-hosted, no per-request cost) was drafted
+> and parked for later — revisit if this becomes a real problem in daily use.
+
 ## Project structure
 
 ```
 brava/
   frontend/   # PWA — capture screen, installed on phone
-  backend/    # Express server — stores ideas as markdown
+  backend/    # Express server — will store ideas as markdown (Milestone 5)
 ```
 
 ## Running locally
@@ -38,9 +42,9 @@ npx serve .
 
 ## Milestones
 
-1. ✅ Project skeleton (this commit)
-2. Voice capture + raw transcription
-3. Filler-word cleanup pass
+1. ✅ Project skeleton
+2. ✅ Voice capture + raw transcription (Web Speech API)
+3. ✅ Filler-word cleanup pass
 4. Structured markdown generation
 5. Storage tied to your account
 6. Laptop review view
