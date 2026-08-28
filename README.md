@@ -45,6 +45,6 @@ npx serve .
 1. ✅ Project skeleton
 2. ✅ Voice capture + raw transcription (Web Speech API)
 3. ✅ Filler-word cleanup pass
-4. Structured markdown generation
+4. ✅ Structured markdown generation
 5. Storage tied to your account
 6. Laptop review view

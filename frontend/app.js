@@ -10,6 +10,11 @@ const captureBtn = document.getElementById("capture-btn");
 const statusLine = document.getElementById("status-line");
 const transcriptEl = document.getElementById("transcript");
 const transcriptCleanEl = document.getElementById("transcript-clean");
+const markdownArea = document.getElementById("markdown-area");
+const markdownPreview = document.getElementById("markdown-preview");
+const downloadBtn = document.getElementById("download-btn");
+
+let currentMarkdown = null;
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -21,10 +26,29 @@ function setStatus(text) {
   statusLine.textContent = text;
 }
 
+function finalizeCapture() {
+  const raw = finalTranscript.trim();
+  const cleaned = window.BravaCleanup ? window.BravaCleanup.cleanTranscript(raw) : raw;
+  transcriptCleanEl.textContent = cleaned;
+
+  if (cleaned && window.BravaMarkdown) {
+    currentMarkdown = window.BravaMarkdown.buildMarkdown(cleaned);
+    markdownPreview.textContent = currentMarkdown.content;
+    markdownArea.hidden = false;
+  } else {
+    markdownArea.hidden = true;
+    currentMarkdown = null;
+  }
+
+  setStatus(raw ? "Captured — tap to speak again" : "Tap to speak");
+}
+
 function startRecording() {
   finalTranscript = "";
   transcriptEl.textContent = "";
   transcriptCleanEl.textContent = "";
+  markdownArea.hidden = true;
+  currentMarkdown = null;
 
   recognition = new SpeechRecognition();
   recognition.lang = "en-US";
@@ -59,11 +83,7 @@ function startRecording() {
   recognition.onend = () => {
     if (isRecording) {
       stopRecordingUI();
-      const cleaned = window.BravaCleanup
-        ? window.BravaCleanup.cleanTranscript(finalTranscript.trim())
-        : finalTranscript.trim();
-      transcriptCleanEl.textContent = cleaned;
-      setStatus(finalTranscript.trim() ? "Captured — tap to speak again" : "Tap to speak");
+      finalizeCapture();
     }
   };
 
@@ -78,13 +98,7 @@ function stopRecording() {
     recognition.stop();
   }
   stopRecordingUI();
-
-  const cleaned = window.BravaCleanup
-    ? window.BravaCleanup.cleanTranscript(finalTranscript.trim())
-    : finalTranscript.trim();
-  transcriptCleanEl.textContent = cleaned;
-
-  setStatus(finalTranscript.trim() ? "Captured — tap to speak again" : "Tap to speak");
+  finalizeCapture();
 }
 
 function stopRecordingUI() {
@@ -109,3 +123,17 @@ if (!SpeechRecognition) {
   setStatus("Speech recognition isn't supported in this browser");
   captureBtn.disabled = true;
 }
+
+downloadBtn.addEventListener("click", () => {
+  if (!currentMarkdown) return;
+
+  const blob = new Blob([currentMarkdown.content], { type: "text/markdown" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = currentMarkdown.filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+});
