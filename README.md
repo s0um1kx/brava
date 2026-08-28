@@ -63,4 +63,10 @@ plain `http://` on your laptop, the browser will block calls between them
 3. ✅ Filler-word cleanup pass
 4. ✅ Structured markdown generation
 5. ✅ Storage tied to your account (backend saves to `backend/ideas/`)
-6. Laptop review view
+6. ✅ Laptop review view (`review.html` — lists and opens saved ideas)
+
+## Vercel deploy note
+
+If you get a 404 (`NOT_FOUND`) on Vercel, it's almost always the Root
+Directory setting. In your Vercel project → Settings → General → Root
+Directory, set it to `frontend`, then redeploy.

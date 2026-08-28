@@ -34,6 +34,16 @@ html, body {
   width: 100%;
   padding-top: 24px;
   text-align: center;
+  position: relative;
+}
+
+.review-link {
+  position: absolute;
+  right: 0;
+  top: 26px;
+  font-size: 12px;
+  color: var(--ink-dim);
+  text-decoration: none;
 }
 
 .brand-mark {

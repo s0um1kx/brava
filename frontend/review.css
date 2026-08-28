@@ -1,0 +1,123 @@
+.review-screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+}
+
+.review-header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.review-subtitle {
+  font-size: 13px;
+  color: var(--ink-dim);
+}
+
+.review-layout {
+  display: flex;
+  gap: 24px;
+  flex: 1;
+  min-height: 0;
+}
+
+.idea-list-panel {
+  width: 280px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--accent-dim);
+  padding-right: 20px;
+}
+
+.panel-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  margin-bottom: 12px;
+}
+
+.refresh-btn {
+  background: none;
+  border: none;
+  color: var(--ink-dim);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 2px 6px;
+}
+
+.idea-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.idea-list-item {
+  padding: 10px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--ink);
+  word-break: break-word;
+  margin-bottom: 4px;
+}
+
+.idea-list-item:hover {
+  background: var(--surface);
+}
+
+.idea-list-item.active {
+  background: var(--accent-dim);
+}
+
+.list-status {
+  font-size: 12px;
+  color: var(--ink-dim);
+  margin-top: 8px;
+}
+
+.idea-detail-panel {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+.detail-empty {
+  color: var(--ink-dim);
+  font-size: 14px;
+  padding-top: 40px;
+  text-align: center;
+}
+
+.detail-actions {
+  margin-bottom: 16px;
+}
+
+.back-link {
+  color: var(--accent);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.detail-markdown {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: "SF Mono", "Cascadia Code", Consolas, monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--accent-dim);
+  border-radius: 10px;
+  padding: 20px;
+  margin: 0;
+}

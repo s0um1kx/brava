@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Brava — Review</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="review.css" />
+</head>
+<body>
+  <main class="review-screen">
+    <header class="review-header">
+      <span class="brand-mark">brava</span>
+      <span class="review-subtitle">Review</span>
+    </header>
+
+    <div class="review-layout">
+      <aside class="idea-list-panel">
+        <div class="panel-heading">
+          <span>Ideas</span>
+          <button id="refresh-btn" class="refresh-btn" aria-label="Refresh list">↻</button>
+        </div>
+        <ul id="idea-list" class="idea-list"></ul>
+        <p id="list-status" class="list-status"></p>
+      </aside>
+
+      <section class="idea-detail-panel">
+        <div id="detail-empty" class="detail-empty">Select an idea to read it</div>
+        <article id="detail-content" class="detail-content" hidden>
+          <div class="detail-actions">
+            <a id="detail-back" href="index.html" class="back-link">← New capture</a>
+          </div>
+          <pre id="detail-markdown" class="detail-markdown"></pre>
+        </article>
+      </section>
+    </div>
+  </main>
+
+  <script src="review.js"></script>
+</body>
+</html>
