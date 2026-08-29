@@ -27,7 +27,7 @@ const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecogni
 
 let recognition = null;
 let isRecording = false;
-let finalTranscript = "";
+let finalChunks = {};
 let latestFullText = "";
 
 function setStatus(text) {
@@ -52,7 +52,7 @@ function finalizeCapture() {
 }
 
 function startRecording() {
-  finalTranscript = "";
+  finalChunks = {};
   latestFullText = "";
   transcriptEl.textContent = "";
   transcriptCleanEl.textContent = "";
@@ -70,13 +70,23 @@ function startRecording() {
     for (let i = event.resultIndex; i < event.results.length; i++) {
       const chunk = event.results[i][0].transcript;
       if (event.results[i].isFinal) {
-        finalTranscript += chunk + " ";
+        // Keyed by index, not appended — if the browser's recognition
+        // session restarts and re-fires an index we've already seen,
+        // this overwrites that slot instead of duplicating the text.
+        finalChunks[i] = chunk;
       } else {
         interim += chunk;
       }
     }
-    transcriptEl.textContent = (finalTranscript + interim).trim();
-    latestFullText = finalTranscript + interim;
+
+    const finalTranscript = Object.keys(finalChunks)
+      .map(Number)
+      .sort((a, b) => a - b)
+      .map((key) => finalChunks[key])
+      .join(" ");
+
+    transcriptEl.textContent = (finalTranscript + " " + interim).trim();
+    latestFullText = finalTranscript + " " + interim;
   };
 
   recognition.onerror = (event) => {

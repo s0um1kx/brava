@@ -132,11 +132,29 @@ html, body {
 
 .transcript-raw {
   color: var(--ink-dim);
+  font-size: 14px;
+  margin-top: 8px;
 }
 
 .transcript-clean {
   color: var(--ink);
   font-size: 18px;
+}
+
+.raw-toggle {
+  text-align: center;
+  margin-top: 4px;
+}
+
+.raw-toggle summary {
+  font-size: 11px;
+  color: var(--ink-dim);
+  cursor: pointer;
+  list-style: none;
+}
+
+.raw-toggle summary::-webkit-details-marker {
+  display: none;
 }
 
 .transcript:empty::before {

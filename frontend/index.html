@@ -23,10 +23,11 @@
     </section>
 
     <section class="transcript-area" aria-live="polite">
-      <p class="transcript-label">Raw</p>
-      <p id="transcript" class="transcript transcript-raw"></p>
-      <p class="transcript-label">Cleaned</p>
       <p id="transcript-clean" class="transcript transcript-clean"></p>
+      <details class="raw-toggle">
+        <summary>Show raw transcript</summary>
+        <p id="transcript" class="transcript transcript-raw"></p>
+      </details>
     </section>
 
     <section class="markdown-area" id="markdown-area" hidden>
