@@ -1,6 +1,11 @@
 const { readIdea } = require("../_lib/storage");
+const { checkPasscode } = require("../_lib/auth");
 
 module.exports = async (req, res) => {
+  if (!checkPasscode(req)) {
+    return res.status(401).json({ error: "Unauthorized." });
+  }
+
   if (req.method !== "GET") {
     res.setHeader("Allow", ["GET"]);
     return res.status(405).json({ error: `Method ${req.method} not allowed.` });

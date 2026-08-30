@@ -12,7 +12,9 @@ async function loadIdeaList() {
   ideaListEl.innerHTML = "";
 
   try {
-    const response = await fetch("/api/ideas");
+    const response = await fetch("/api/ideas", {
+      headers: { "x-brava-passcode": window.BravaAuth ? window.BravaAuth.getPasscode() : "" },
+    });
     const data = await response.json();
 
     if (!response.ok) {
@@ -47,7 +49,9 @@ async function selectIdea(filename) {
   });
 
   try {
-    const response = await fetch(`/api/ideas/${encodeURIComponent(filename)}`);
+    const response = await fetch(`/api/ideas/${encodeURIComponent(filename)}`, {
+      headers: { "x-brava-passcode": window.BravaAuth ? window.BravaAuth.getPasscode() : "" },
+    });
     const data = await response.json();
 
     if (!response.ok) {
@@ -67,4 +71,8 @@ async function selectIdea(filename) {
 
 refreshBtn.addEventListener("click", loadIdeaList);
 
-loadIdeaList();
+if (window.BravaAuth) {
+  window.BravaAuth.requireAuth().then(() => loadIdeaList());
+} else {
+  loadIdeaList();
+}

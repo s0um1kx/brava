@@ -1,6 +1,11 @@
 const { saveIdea, listIdeas } = require("./_lib/storage");
+const { checkPasscode } = require("./_lib/auth");
 
 module.exports = async (req, res) => {
+  if (!checkPasscode(req)) {
+    return res.status(401).json({ error: "Unauthorized." });
+  }
+
   if (req.method === "GET") {
     try {
       const ideas = await listIdeas();

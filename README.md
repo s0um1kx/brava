@@ -51,7 +51,11 @@ Environment Variables):
 ```
 SUPABASE_URL=...
 SUPABASE_SERVICE_ROLE_KEY=...
+BRAVA_PASSCODE=choose-any-secret-phrase
 ```
+`BRAVA_PASSCODE` is a single shared secret gating access to your ideas —
+appropriate for a personal, single-user tool. Each device asks for it once
+and remembers it locally after that.
 
 **4. For local testing**, install the Vercel CLI and create `frontend/.env.local`
 (already gitignored) with the same two variables, then run:
@@ -77,3 +81,6 @@ If you see a 404 (`NOT_FOUND`), that's almost always this setting.
 5. ✅ Storage — now on Supabase via Vercel serverless functions (same origin
    as frontend, works from any device with no CORS/mixed-content issues)
 6. ✅ Laptop review view
+7. ✅ Passcode gate (single shared secret) + automatic device routing —
+   phone opens straight to capture, laptop (wide screen, non-PWA) is
+   redirected to the review view

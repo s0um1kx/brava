@@ -6,6 +6,25 @@ if ("serviceWorker" in navigator) {
   });
 }
 
+// Capture is a phone-first action. If this URL is opened on a wide (laptop)
+// screen and isn't running as an installed PWA, send it to the review view
+// instead — that's the screen a laptop visit is actually for.
+(function maybeRedirectToReview() {
+  const isStandalonePWA =
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.navigator.standalone === true;
+  const isWideScreen = window.innerWidth >= 900;
+  const forcedCapture = new URLSearchParams(window.location.search).has("capture");
+
+  if (isWideScreen && !isStandalonePWA && !forcedCapture) {
+    window.location.replace("review.html");
+  }
+})();
+
+if (window.BravaAuth) {
+  window.BravaAuth.requireAuth();
+}
+
 const captureBtn = document.getElementById("capture-btn");
 const statusLine = document.getElementById("status-line");
 const transcriptEl = document.getElementById("transcript");
@@ -162,7 +181,10 @@ saveBtn.addEventListener("click", async () => {
   try {
     const response = await fetch("/api/ideas", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-brava-passcode": window.BravaAuth ? window.BravaAuth.getPasscode() : "",
+      },
       body: JSON.stringify(currentMarkdown),
     });
 
