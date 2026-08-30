@@ -37,10 +37,39 @@ function buildFillerRegex(list) {
 const phraseRegex = buildFillerRegex(FILLER_PHRASES);
 const wordRegex = buildFillerRegex(FILLER_WORDS);
 
+// Speech recognition (especially continuous mode on mobile) sometimes
+// re-guesses overlapping audio as separate finalized segments, producing
+// stutter like "I am am in in sitting sitting" or whole repeated phrases.
+// This collapses any phrase (1 word up to half the transcript) that
+// immediately repeats itself, down to a single occurrence.
+function dedupeAdjacentPhrases(text) {
+  let words = text.split(/\s+/).filter(Boolean);
+  let changed = true;
+
+  while (changed) {
+    changed = false;
+
+    for (let len = Math.floor(words.length / 2); len >= 1 && !changed; len--) {
+      for (let i = 0; i + 2 * len <= words.length; i++) {
+        const a = words.slice(i, i + len).join(" ").toLowerCase();
+        const b = words.slice(i + len, i + 2 * len).join(" ").toLowerCase();
+
+        if (a === b) {
+          words.splice(i + len, len); // drop the repeated occurrence
+          changed = true;
+          break;
+        }
+      }
+    }
+  }
+
+  return words.join(" ");
+}
+
 function cleanTranscript(rawText) {
   if (!rawText) return "";
 
-  let text = rawText;
+  let text = dedupeAdjacentPhrases(rawText);
 
   // Remove longer filler phrases first so they don't get partially matched
   // by the shorter word-level patterns.
