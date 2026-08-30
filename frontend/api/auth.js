@@ -1,9 +1,14 @@
-// Single shared-secret check — appropriate for a personal, single-user tool.
-// The passcode lives only in an environment variable on the server; it's
-// never present in any frontend JS bundle.
-function checkPasscode(req) {
-  const provided = req.headers["x-brava-passcode"];
-  return Boolean(provided) && provided === process.env.BRAVA_PASSCODE;
-}
+module.exports = (req, res) => {
+  if (req.method !== "POST") {
+    res.setHeader("Allow", ["POST"]);
+    return res.status(405).json({ error: `Method ${req.method} not allowed.` });
+  }
 
-module.exports = { checkPasscode };
+  const { passcode } = req.body || {};
+
+  if (passcode && passcode === process.env.BRAVA_PASSCODE) {
+    return res.status(200).json({ ok: true });
+  }
+
+  res.status(401).json({ error: "Incorrect passcode." });
+};
