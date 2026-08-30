@@ -1,5 +1,3 @@
-const BACKEND_URL = window.BRAVA_BACKEND_URL || "http://localhost:3000";
-
 const ideaListEl = document.getElementById("idea-list");
 const listStatusEl = document.getElementById("list-status");
 const refreshBtn = document.getElementById("refresh-btn");
@@ -14,7 +12,7 @@ async function loadIdeaList() {
   ideaListEl.innerHTML = "";
 
   try {
-    const response = await fetch(`${BACKEND_URL}/api/ideas`);
+    const response = await fetch("/api/ideas");
     const data = await response.json();
 
     if (!response.ok) {
@@ -49,7 +47,7 @@ async function selectIdea(filename) {
   });
 
   try {
-    const response = await fetch(`${BACKEND_URL}/api/ideas/${encodeURIComponent(filename)}`);
+    const response = await fetch(`/api/ideas/${encodeURIComponent(filename)}`);
     const data = await response.json();
 
     if (!response.ok) {

@@ -16,11 +16,6 @@ const downloadBtn = document.getElementById("download-btn");
 const saveBtn = document.getElementById("save-btn");
 const saveStatus = document.getElementById("save-status");
 
-// Point this at your backend. On your phone testing over the network,
-// "localhost" won't reach your laptop — see README for the mixed-content
-// note about HTTPS frontend + HTTP backend.
-const BACKEND_URL = window.BRAVA_BACKEND_URL || "http://localhost:3000";
-
 let currentMarkdown = null;
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -165,7 +160,7 @@ saveBtn.addEventListener("click", async () => {
   saveStatus.textContent = "Saving…";
 
   try {
-    const response = await fetch(`${BACKEND_URL}/api/ideas`, {
+    const response = await fetch("/api/ideas", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(currentMarkdown),
