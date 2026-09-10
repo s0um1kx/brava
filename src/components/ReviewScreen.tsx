@@ -1,7 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { IconSearch, IconPointFilled, IconCheck } from "@tabler/icons-react";
-import { MOCK_IDEAS, Idea } from "@/lib/mockIdeas";
+import { Idea } from "@/lib/types";
 import { groupIdeasByDate } from "@/lib/groupIdeasByDate";
 
 function formatTime(iso: string): string {
@@ -60,7 +61,18 @@ function IdeaRow({ idea }: { idea: Idea }) {
 }
 
 export function ReviewScreen() {
-  const groups = groupIdeasByDate(MOCK_IDEAS);
+  const [ideas, setIdeas] = useState<Idea[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/ideas")
+      .then((res) => res.json())
+      .then((data) => setIdeas(data))
+      .catch((err) => console.error("Failed to load ideas:", err))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const groups = groupIdeasByDate(ideas);
 
   return (
     <div style={{ maxWidth: 560, margin: "0 auto", padding: "1.5rem 1rem" }}>
@@ -80,6 +92,12 @@ export function ReviewScreen() {
         <IconSearch size={16} color="var(--text-muted)" stroke={1.75} />
         <span style={{ fontSize: 14, color: "var(--text-muted)" }}>search ideas</span>
       </div>
+
+      {!loading && ideas.length === 0 && (
+        <p style={{ fontSize: 14, color: "var(--text-muted)", padding: "0 4px" }}>
+          No ideas captured yet.
+        </p>
+      )}
 
       {groups.map((group) => (
         <div key={group.label}>

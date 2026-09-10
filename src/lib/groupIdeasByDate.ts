@@ -1,4 +1,4 @@
-import { Idea } from "./mockIdeas";
+import { Idea } from "./types";
 
 function dateLabel(iso: string): string {
   const date = new Date(iso);
