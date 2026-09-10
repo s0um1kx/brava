@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { IconMicrophone, IconCheck } from "@tabler/icons-react";
 import { useSpeechCapture } from "@/hooks/useSpeechCapture";
+import { cleanTranscript } from "@/lib/cleanTranscript";
 
 type CaptureState = "idle" | "listening" | "saved";
 
@@ -16,7 +17,8 @@ export function CaptureScreen() {
       start();
     } else if (state === "listening") {
       const finalText = stop();
-      console.log("Captured transcript:", finalText); // temporary — step 5 replaces this
+      const cleaned = cleanTranscript(finalText);
+      console.log("Captured transcript:", cleaned);
       setState("saved");
       setTimeout(() => setState("idle"), 1200);
     }
