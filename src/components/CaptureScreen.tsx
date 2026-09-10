@@ -17,13 +17,23 @@ export function CaptureScreen() {
       setState("listening");
       start();
     } else if (state === "listening") {
-      const finalText = stop();
-      const cleaned = cleanTranscript(finalText);
-       const idea = generateIdeaMarkdown(cleaned);
-      console.log("Generated markdown:\n", idea.markdown);
-      setState("saved");
-      setTimeout(() => setState("idle"), 1200);
-    }
+  const finalText = stop();
+  const cleaned = cleanTranscript(finalText);
+  const idea = generateIdeaMarkdown(cleaned);
+
+  fetch("/api/ideas", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      title: idea.title,
+      filename: idea.filename,
+      markdown: idea.markdown,
+    }),
+  }).catch((err) => console.error("Failed to save idea:", err));
+
+  setState("saved");
+  setTimeout(() => setState("idle"), 1200);
+}
   };
 
   const label =
