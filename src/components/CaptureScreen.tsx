@@ -2,20 +2,24 @@
 
 import { useState } from "react";
 import { IconMicrophone, IconCheck } from "@tabler/icons-react";
+import { useSpeechCapture } from "@/hooks/useSpeechCapture";
 
 type CaptureState = "idle" | "listening" | "saved";
 
 export function CaptureScreen() {
   const [state, setState] = useState<CaptureState>("idle");
+  const { start, stop, transcript } = useSpeechCapture();
 
   const handleTap = () => {
     if (state === "idle") {
       setState("listening");
+      start();
     } else if (state === "listening") {
+      const finalText = stop();
+      console.log("Captured transcript:", finalText); // temporary — step 5 replaces this
       setState("saved");
       setTimeout(() => setState("idle"), 1200);
     }
-    // tapping while "saved" does nothing — button is momentarily inert
   };
 
   const label =
