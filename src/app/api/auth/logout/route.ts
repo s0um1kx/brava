@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { sql } from "@/lib/db";
 
-export async function POST(req: Request) {
+export async function GET(req: Request) {
   const cookieStore = await cookies();
   const sessionId = cookieStore.get("session")?.value;
 
