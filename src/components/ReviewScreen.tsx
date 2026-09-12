@@ -66,12 +66,12 @@ export function ReviewScreen() {
   const [user, setUser] = useState<{ email: string; name: string } | null>(null);
 
   useEffect(() => {
-    fetch("/api/ideas")
-      .then((res) => res.json())
-      .then((data) => setIdeas(data))
-      .catch((err) => console.error("Failed to load ideas:", err))
-      .finally(() => setLoading(false));
-  }, []);
+  fetch("/api/ideas")
+    .then((res) => (res.ok ? res.json() : []))
+    .then((data) => setIdeas(data))
+    .catch((err) => console.error("Failed to load ideas:", err))
+    .finally(() => setLoading(false));
+}, []);
 
   useEffect(() => {
     fetch("/api/auth/me")
