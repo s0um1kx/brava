@@ -1,26 +1,44 @@
 "use client";
 
 import { useState } from "react";
-import { IconMicrophone, IconCheck, IconBrandGoogle } from "@tabler/icons-react";
+import {
+  IconMicrophone,
+  IconCheck,
+  IconBrandGoogle,
+  IconMicrophoneOff,
+  IconAlertCircle,
+} from "@tabler/icons-react";
 import { useSpeechCapture } from "@/hooks/useSpeechCapture";
 import { cleanTranscript } from "@/lib/cleanTranscript";
 import { generateIdeaMarkdown } from "@/lib/generateIdeaMarkdown";
 import { useAuth } from "@/hooks/useAuth";
 
-type CaptureState = "idle" | "listening" | "saved";
+type CaptureState = "idle" | "listening" | "saved" | "empty" | "error";
+
+const ERROR_MESSAGES: Record<string, string> = {
+  "not-allowed": "microphone blocked — check permissions",
+  "audio-capture": "no microphone found",
+  network: "connection issue — try again",
+  "not-supported": "speech recognition isn't supported here",
+};
 
 export function CaptureScreen() {
   const [state, setState] = useState<CaptureState>("idle");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [pulseCount, setPulseCount] = useState(0);
   const { user, loading } = useAuth();
-  const { start, stop } = useSpeechCapture();
 
-  const handleTap = () => {
-    if (state === "idle") {
-      setState("listening");
-      start();
-    } else if (state === "listening") {
-      const finalText = stop();
+  const { start, stop } = useSpeechCapture({
+    onSoundDetected: () => setPulseCount((c) => c + 1),
+    onEnded: (finalText) => {
       const cleaned = cleanTranscript(finalText);
+
+      if (!cleaned) {
+        setState("empty");
+        setTimeout(() => setState("idle"), 1500);
+        return;
+      }
+
       const idea = generateIdeaMarkdown(cleaned);
 
       fetch("/api/ideas", {
@@ -35,11 +53,32 @@ export function CaptureScreen() {
 
       setState("saved");
       setTimeout(() => setState("idle"), 1200);
+    },
+    onError: (error) => {
+      setErrorMessage(ERROR_MESSAGES[error] ?? "something went wrong");
+      setState("error");
+    },
+  });
+
+  const handleTap = () => {
+    if (state === "idle" || state === "error") {
+      setState("listening");
+      start();
+    } else if (state === "listening") {
+      stop(); // onEnded above takes it from here
     }
   };
 
   const label =
-    state === "idle" ? "tap to capture" : state === "listening" ? "listening" : "saved";
+    state === "idle"
+      ? "tap to capture"
+      : state === "listening"
+        ? "listening"
+        : state === "saved"
+          ? "saved"
+          : state === "empty"
+            ? "didn't catch anything"
+            : errorMessage;
 
   if (loading) {
     return null;
@@ -68,10 +107,7 @@ export function CaptureScreen() {
           brava
         </span>
         {user && (
-          <a
-            href="/api/auth/logout"
-            style={{ fontSize: 13, color: "var(--text-muted)" }}
-          >
+          <a href="/api/auth/logout" style={{ fontSize: 13, color: "var(--text-muted)" }}>
             sign out
           </a>
         )}
@@ -101,36 +137,64 @@ export function CaptureScreen() {
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
-          <button
-            onClick={handleTap}
-            aria-label={label}
-            style={{
-              width: 88,
-              height: 88,
-              borderRadius: "50%",
-              border: state === "idle" ? "0.5px solid var(--border-strong)" : "none",
-              background: state === "listening" ? "var(--bg-accent)" : "var(--surface-1)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-            }}
-          >
-            {state === "saved" ? (
-              <IconCheck size={32} color="var(--text-success)" stroke={1.75} />
-            ) : (
-              <IconMicrophone
-                size={32}
-                color={state === "listening" ? "var(--text-accent)" : "var(--text-secondary)"}
-                stroke={1.75}
+          <div style={{ position: "relative", width: 88, height: 88 }}>
+            {state === "listening" && (
+              <div
+                key={pulseCount}
+                style={{
+                  position: "absolute",
+                  inset: -6,
+                  borderRadius: "50%",
+                  border: "2px solid var(--text-accent)",
+                  animation: "brava-pulse 0.6s ease-out",
+                  pointerEvents: "none",
+                }}
               />
             )}
-          </button>
+            <button
+              onClick={handleTap}
+              aria-label={label}
+              style={{
+                width: 88,
+                height: 88,
+                borderRadius: "50%",
+                border:
+                  state === "idle" || state === "error"
+                    ? "0.5px solid var(--border-strong)"
+                    : "none",
+                background: state === "listening" ? "var(--bg-accent)" : "var(--surface-1)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+              }}
+            >
+              {state === "saved" ? (
+                <IconCheck size={32} color="var(--text-success)" stroke={1.75} />
+              ) : state === "empty" ? (
+                <IconMicrophoneOff size={32} color="var(--text-muted)" stroke={1.75} />
+              ) : state === "error" ? (
+                <IconAlertCircle size={32} color="var(--text-warning)" stroke={1.75} />
+              ) : (
+                <IconMicrophone
+                  size={32}
+                  color={state === "listening" ? "var(--text-accent)" : "var(--text-secondary)"}
+                  stroke={1.75}
+                />
+              )}
+            </button>
+          </div>
           <p
             style={{
               fontSize: 13,
               margin: 0,
-              color: state === "listening" ? "var(--text-accent)" : "var(--text-muted)",
+              textAlign: "center",
+              color:
+                state === "listening"
+                  ? "var(--text-accent)"
+                  : state === "error"
+                    ? "var(--text-warning)"
+                    : "var(--text-muted)",
             }}
           >
             {label}
