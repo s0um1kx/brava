@@ -1,24 +1,44 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { IconSearch, IconPointFilled, IconCheck, IconBrandGoogle } from "@tabler/icons-react";
+import {
+  IconSearch,
+  IconPointFilled,
+  IconCheck,
+  IconBrandGoogle,
+  IconCopy,
+} from "@tabler/icons-react";
 import { Idea } from "@/lib/types";
 import { groupIdeasByDate } from "@/lib/groupIdeasByDate";
 import { useAuth } from "@/hooks/useAuth";
+
+interface IdeaDetail {
+  body: string;
+  reviewed: boolean;
+}
 
 function formatTime(iso: string): string {
   return new Date(iso).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
 }
 
-function IdeaRow({ idea }: { idea: Idea }) {
+function IdeaRow({
+  idea,
+  expanded,
+  onToggle,
+}: {
+  idea: Idea;
+  expanded: boolean;
+  onToggle: () => void;
+}) {
   return (
     <div
+      onClick={onToggle}
       style={{
         display: "flex",
         alignItems: "center",
         gap: 12,
         padding: "12px 4px",
-        borderBottom: "0.5px solid var(--border)",
+        borderBottom: expanded ? "none" : "0.5px solid var(--border)",
         cursor: "pointer",
       }}
     >
@@ -61,9 +81,89 @@ function IdeaRow({ idea }: { idea: Idea }) {
   );
 }
 
+function IdeaDetailPanel({
+  idea,
+  detail,
+  onToggleReviewed,
+}: {
+  idea: Idea;
+  detail: IdeaDetail | null;
+  onToggleReviewed: () => void;
+}) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    if (!detail) return;
+    await navigator.clipboard.writeText(detail.body);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+
+  return (
+    <div
+      style={{
+        padding: "4px 4px 16px",
+        borderBottom: "0.5px solid var(--border)",
+      }}
+    >
+      {!detail ? (
+        <p style={{ fontSize: 13, color: "var(--text-muted)" }}>loading…</p>
+      ) : (
+        <>
+          <p
+            style={{
+              fontSize: 14,
+              lineHeight: 1.6,
+              color: "var(--text-primary)",
+              whiteSpace: "pre-wrap",
+              margin: "8px 0 16px",
+            }}
+          >
+            {detail.body}
+          </p>
+          <div style={{ display: "flex", gap: 16 }}>
+            <button
+              onClick={handleCopy}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                fontSize: 13,
+                color: "var(--text-secondary)",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                padding: 0,
+              }}
+            >
+              <IconCopy size={14} stroke={1.75} />
+              {copied ? "copied" : "copy"}
+            </button>
+            <button
+              onClick={onToggleReviewed}
+              style={{
+                fontSize: 13,
+                color: "var(--text-secondary)",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                padding: 0,
+              }}
+            >
+              {detail.reviewed ? "mark unreviewed" : "mark reviewed"}
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 export function ReviewScreen() {
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [loadingIdeas, setLoadingIdeas] = useState(true);
+  const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [detailsById, setDetailsById] = useState<Record<number, IdeaDetail>>({});
   const { user, loading: loadingAuth } = useAuth();
 
   useEffect(() => {
@@ -73,6 +173,54 @@ export function ReviewScreen() {
       .catch((err) => console.error("Failed to load ideas:", err))
       .finally(() => setLoadingIdeas(false));
   }, []);
+
+  const handleToggleExpand = async (idea: Idea) => {
+    if (expandedId === idea.id) {
+      setExpandedId(null);
+      return;
+    }
+
+    setExpandedId(idea.id);
+
+    if (!detailsById[idea.id]) {
+      try {
+        const res = await fetch(`/api/ideas/${idea.id}`);
+        if (!res.ok) throw new Error(`Failed with status ${res.status}`);
+        const data = await res.json();
+        setDetailsById((prev) => ({
+          ...prev,
+          [idea.id]: { body: data.body, reviewed: data.reviewed },
+        }));
+      } catch (err) {
+        console.error("Failed to load idea detail:", err);
+      }
+    }
+  };
+
+  const handleToggleReviewed = async (idea: Idea) => {
+    const current = detailsById[idea.id];
+    if (!current) return;
+    const nextReviewed = !current.reviewed;
+
+    try {
+      const res = await fetch(`/api/ideas/${idea.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviewed: nextReviewed }),
+      });
+      if (!res.ok) throw new Error(`Failed with status ${res.status}`);
+
+      setDetailsById((prev) => ({
+        ...prev,
+        [idea.id]: { ...prev[idea.id], reviewed: nextReviewed },
+      }));
+      setIdeas((prev) =>
+        prev.map((i) => (i.id === idea.id ? { ...i, reviewed: nextReviewed } : i))
+      );
+    } catch (err) {
+      console.error("Failed to update reviewed status:", err);
+    }
+  };
 
   const groups = groupIdeasByDate(ideas);
 
@@ -144,7 +292,20 @@ export function ReviewScreen() {
             {group.label}
           </p>
           {group.ideas.map((idea) => (
-            <IdeaRow key={idea.id} idea={idea} />
+            <div key={idea.id}>
+              <IdeaRow
+                idea={idea}
+                expanded={expandedId === idea.id}
+                onToggle={() => handleToggleExpand(idea)}
+              />
+              {expandedId === idea.id && (
+                <IdeaDetailPanel
+                  idea={idea}
+                  detail={detailsById[idea.id] ?? null}
+                  onToggleReviewed={() => handleToggleReviewed(idea)}
+                />
+              )}
+            </div>
           ))}
         </div>
       ))}
