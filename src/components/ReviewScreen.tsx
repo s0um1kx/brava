@@ -63,6 +63,7 @@ function IdeaRow({ idea }: { idea: Idea }) {
 export function ReviewScreen() {
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<{ email: string; name: string } | null>(null);
 
   useEffect(() => {
     fetch("/api/ideas")
@@ -72,10 +73,40 @@ export function ReviewScreen() {
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((res) => res.json())
+      .then((data) => setUser(data.user))
+      .catch(() => setUser(null));
+  }, []);
+
   const groups = groupIdeasByDate(ideas);
 
   return (
     <div style={{ maxWidth: 560, margin: "0 auto", padding: "1.5rem 1rem" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          marginBottom: 12,
+          fontSize: 13,
+          color: "var(--text-muted)",
+        }}
+      >
+        {user ? (
+          <span>
+            {user.email}{" "}
+            <a href="/api/auth/logout" style={{ color: "var(--text-secondary)" }}>
+              sign out
+            </a>
+          </span>
+        ) : (
+          <a href="/api/auth/login" style={{ color: "var(--text-accent)" }}>
+            sign in with google
+          </a>
+        )}
+      </div>
+
       <div
         style={{
           display: "flex",
