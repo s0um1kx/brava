@@ -2,7 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 
-type SpeechRecognition = any;
+type SpeechRecognitionType = any;
 
 interface UseSpeechCaptureOptions {
   onSoundDetected?: () => void;
@@ -12,27 +12,25 @@ interface UseSpeechCaptureOptions {
 
 export function useSpeechCapture(options: UseSpeechCaptureOptions = {}) {
   const [isListening, setIsListening] = useState(false);
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
-  // Indexed by the browser's own result index, so a re-fired event for a
-  // result we've already finalized overwrites that slot instead of being
-  // appended again — this is what actually prevents the duplication.
-  const finalizedResultsRef = useRef<string[]>([]);
+  const recognitionRef = useRef<SpeechRecognitionType | null>(null);
+  // Each recognition instance only ever contributes its own finalized
+  // segments once, then we chain a new instance — so this is a simple
+  // append, not an index-keyed structure. That's intentional: the bug this
+  // fixes is Chrome silently re-transcribing old audio as brand-new result
+  // indices inside ONE long-running session, so the real fix is to never
+  // let a single session run long enough for that to happen.
+  const segmentsRef = useRef<string[]>([]);
+  const stopRequestedRef = useRef(false);
   const optionsRef = useRef(options);
   optionsRef.current = options;
 
-  const start = useCallback(() => {
+  const createRecognition = useCallback((): SpeechRecognitionType | null => {
     const SpeechRecognitionCtor =
       (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognitionCtor) return null;
 
-    if (!SpeechRecognitionCtor) {
-      optionsRef.current.onError?.("not-supported");
-      return;
-    }
-
-    finalizedResultsRef.current = [];
-
-    const recognition: SpeechRecognition = new SpeechRecognitionCtor();
-    recognition.continuous = true;
+    const recognition: SpeechRecognitionType = new SpeechRecognitionCtor();
+    recognition.continuous = false; // one utterance per instance, on purpose
     recognition.interimResults = true;
     recognition.lang = "en-US";
 
@@ -41,7 +39,7 @@ export function useSpeechCapture(options: UseSpeechCaptureOptions = {}) {
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const result = event.results[i];
         if (result.isFinal) {
-          finalizedResultsRef.current[i] = result[0].transcript.trim();
+          segmentsRef.current.push(result[0].transcript.trim());
         }
         hasNew = true;
       }
@@ -50,29 +48,55 @@ export function useSpeechCapture(options: UseSpeechCaptureOptions = {}) {
 
     recognition.onerror = (event: any) => {
       console.error("Speech recognition error:", event.error);
+      if (event.error === "no-speech") {
+        // Just a quiet gap between words — not a real error, let onend
+        // below chain the next instance as normal.
+        return;
+      }
       if (
         event.error === "not-allowed" ||
         event.error === "audio-capture" ||
         event.error === "network"
       ) {
+        stopRequestedRef.current = true;
         optionsRef.current.onError?.(event.error);
       }
     };
 
     recognition.onend = () => {
-      setIsListening(false);
-      // Join only the slots that actually got a final result — filters out
-      // any gaps left by interim-only indices.
-      const finalText = finalizedResultsRef.current.filter(Boolean).join(" ");
-      optionsRef.current.onEnded?.(finalText);
+      if (stopRequestedRef.current) {
+        setIsListening(false);
+        const finalText = segmentsRef.current.join(" ").trim();
+        optionsRef.current.onEnded?.(finalText);
+        return;
+      }
+      // The user hasn't tapped stop — chain a fresh instance to keep
+      // listening seamlessly for the next bit of speech.
+      const next = createRecognition();
+      if (next) {
+        recognitionRef.current = next;
+        next.start();
+      }
     };
 
-    recognition.start();
-    recognitionRef.current = recognition;
-    setIsListening(true);
+    return recognition;
   }, []);
 
+  const start = useCallback(() => {
+    const recognition = createRecognition();
+    if (!recognition) {
+      optionsRef.current.onError?.("not-supported");
+      return;
+    }
+    segmentsRef.current = [];
+    stopRequestedRef.current = false;
+    recognitionRef.current = recognition;
+    recognition.start();
+    setIsListening(true);
+  }, [createRecognition]);
+
   const stop = useCallback(() => {
+    stopRequestedRef.current = true;
     recognitionRef.current?.stop();
   }, []);
 
