@@ -1,26 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { IconMicrophone, IconCheck, IconBrandGoogle } from "@tabler/icons-react";
 import { useSpeechCapture } from "@/hooks/useSpeechCapture";
 import { cleanTranscript } from "@/lib/cleanTranscript";
 import { generateIdeaMarkdown } from "@/lib/generateIdeaMarkdown";
+import { useAuth } from "@/hooks/useAuth";
 
 type CaptureState = "idle" | "listening" | "saved";
 
 export function CaptureScreen() {
   const [state, setState] = useState<CaptureState>("idle");
-  const [authChecked, setAuthChecked] = useState(false);
-  const [signedIn, setSignedIn] = useState(false);
+  const { user, loading } = useAuth();
   const { start, stop } = useSpeechCapture();
-
-  useEffect(() => {
-    fetch("/api/auth/me")
-      .then((res) => res.json())
-      .then((data) => setSignedIn(!!data.user))
-      .catch(() => setSignedIn(false))
-      .finally(() => setAuthChecked(true));
-  }, []);
 
   const handleTap = () => {
     if (state === "idle") {
@@ -49,7 +41,7 @@ export function CaptureScreen() {
   const label =
     state === "idle" ? "tap to capture" : state === "listening" ? "listening" : "saved";
 
-  if (!authChecked) {
+  if (loading) {
     return null;
   }
 
@@ -70,7 +62,7 @@ export function CaptureScreen() {
         </span>
       </div>
 
-      {!signedIn ? (
+      {!user ? (
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
           <a
             href="/api/auth/login"
@@ -89,7 +81,7 @@ export function CaptureScreen() {
             <IconBrandGoogle size={32} color="var(--text-secondary)" stroke={1.75} />
           </a>
           <p style={{ fontSize: 13, color: "var(--text-muted)", margin: 0 }}>
-            sign in to capture
+            sign in with google
           </p>
         </div>
       ) : (

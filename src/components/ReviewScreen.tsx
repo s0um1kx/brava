@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { IconSearch, IconPointFilled, IconCheck } from "@tabler/icons-react";
+import { IconSearch, IconPointFilled, IconCheck, IconBrandGoogle } from "@tabler/icons-react";
 import { Idea } from "@/lib/types";
 import { groupIdeasByDate } from "@/lib/groupIdeasByDate";
+import { useAuth } from "@/hooks/useAuth";
 
 function formatTime(iso: string): string {
   return new Date(iso).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
@@ -62,22 +63,15 @@ function IdeaRow({ idea }: { idea: Idea }) {
 
 export function ReviewScreen() {
   const [ideas, setIdeas] = useState<Idea[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<{ email: string; name: string } | null>(null);
+  const [loadingIdeas, setLoadingIdeas] = useState(true);
+  const { user, loading: loadingAuth } = useAuth();
 
   useEffect(() => {
-  fetch("/api/ideas")
-    .then((res) => (res.ok ? res.json() : []))
-    .then((data) => setIdeas(data))
-    .catch((err) => console.error("Failed to load ideas:", err))
-    .finally(() => setLoading(false));
-}, []);
-
-  useEffect(() => {
-    fetch("/api/auth/me")
-      .then((res) => res.json())
-      .then((data) => setUser(data.user))
-      .catch(() => setUser(null));
+    fetch("/api/ideas")
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => setIdeas(data))
+      .catch((err) => console.error("Failed to load ideas:", err))
+      .finally(() => setLoadingIdeas(false));
   }, []);
 
   const groups = groupIdeasByDate(ideas);
@@ -87,21 +81,27 @@ export function ReviewScreen() {
       <div
         style={{
           display: "flex",
+          alignItems: "center",
           justifyContent: "flex-end",
+          gap: 6,
           marginBottom: 12,
           fontSize: 13,
           color: "var(--text-muted)",
         }}
       >
-        {user ? (
-          <span>
+        {loadingAuth ? null : user ? (
+          <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
             {user.email}{" "}
             <a href="/api/auth/logout" style={{ color: "var(--text-secondary)" }}>
               sign out
             </a>
           </span>
         ) : (
-          <a href="/api/auth/login" style={{ color: "var(--text-accent)" }}>
+          <a
+            href="/api/auth/login"
+            style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--text-accent)" }}
+          >
+            <IconBrandGoogle size={14} stroke={1.75} />
             sign in with google
           </a>
         )}
@@ -124,7 +124,7 @@ export function ReviewScreen() {
         <span style={{ fontSize: 14, color: "var(--text-muted)" }}>search ideas</span>
       </div>
 
-      {!loading && ideas.length === 0 && (
+      {!loadingIdeas && ideas.length === 0 && (
         <p style={{ fontSize: 14, color: "var(--text-muted)", padding: "0 4px" }}>
           No ideas captured yet.
         </p>
