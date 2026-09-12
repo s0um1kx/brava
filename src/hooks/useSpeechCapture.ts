@@ -13,7 +13,10 @@ interface UseSpeechCaptureOptions {
 export function useSpeechCapture(options: UseSpeechCaptureOptions = {}) {
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
-  const finalTextRef = useRef("");
+  // Indexed by the browser's own result index, so a re-fired event for a
+  // result we've already finalized overwrites that slot instead of being
+  // appended again — this is what actually prevents the duplication.
+  const finalizedResultsRef = useRef<string[]>([]);
   const optionsRef = useRef(options);
   optionsRef.current = options;
 
@@ -26,7 +29,7 @@ export function useSpeechCapture(options: UseSpeechCaptureOptions = {}) {
       return;
     }
 
-    finalTextRef.current = "";
+    finalizedResultsRef.current = [];
 
     const recognition: SpeechRecognition = new SpeechRecognitionCtor();
     recognition.continuous = true;
@@ -38,7 +41,7 @@ export function useSpeechCapture(options: UseSpeechCaptureOptions = {}) {
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const result = event.results[i];
         if (result.isFinal) {
-          finalTextRef.current += result[0].transcript + " ";
+          finalizedResultsRef.current[i] = result[0].transcript.trim();
         }
         hasNew = true;
       }
@@ -56,13 +59,12 @@ export function useSpeechCapture(options: UseSpeechCaptureOptions = {}) {
       }
     };
 
-    // Fires whether recognition stopped because the user tapped stop(),
-    // or because the browser ended the session on its own (e.g. after a
-    // pause). Either way, this is the single source of truth for "we're
-    // done listening now" — the UI never gets silently stuck.
     recognition.onend = () => {
       setIsListening(false);
-      optionsRef.current.onEnded?.(finalTextRef.current.trim());
+      // Join only the slots that actually got a final result — filters out
+      // any gaps left by interim-only indices.
+      const finalText = finalizedResultsRef.current.filter(Boolean).join(" ");
+      optionsRef.current.onEnded?.(finalText);
     };
 
     recognition.start();
