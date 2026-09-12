@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   IconMicrophone,
   IconCheck,
@@ -13,24 +13,34 @@ import { cleanTranscript } from "@/lib/cleanTranscript";
 import { generateIdeaMarkdown } from "@/lib/generateIdeaMarkdown";
 import { useAuth } from "@/hooks/useAuth";
 
-type CaptureState = "idle" | "listening" | "saved" | "empty" | "error";
+type CaptureState = "idle" | "listening" | "saving" | "saved" | "empty" | "error";
 
 const ERROR_MESSAGES: Record<string, string> = {
   "not-allowed": "microphone blocked — check permissions",
   "audio-capture": "no microphone found",
   network: "connection issue — try again",
   "not-supported": "speech recognition isn't supported here",
+  "save-failed": "couldn't save — try again",
 };
+
+const PULSE_THROTTLE_MS = 400;
 
 export function CaptureScreen() {
   const [state, setState] = useState<CaptureState>("idle");
   const [errorMessage, setErrorMessage] = useState("");
   const [pulseCount, setPulseCount] = useState(0);
+  const lastPulseRef = useRef(0);
   const { user, loading } = useAuth();
 
   const { start, stop } = useSpeechCapture({
-    onSoundDetected: () => setPulseCount((c) => c + 1),
-    onEnded: (finalText) => {
+    onSoundDetected: () => {
+      const now = Date.now();
+      if (now - lastPulseRef.current > PULSE_THROTTLE_MS) {
+        lastPulseRef.current = now;
+        setPulseCount((c) => c + 1);
+      }
+    },
+    onEnded: async (finalText) => {
       const cleaned = cleanTranscript(finalText);
 
       if (!cleaned) {
@@ -39,20 +49,29 @@ export function CaptureScreen() {
         return;
       }
 
+      setState("saving");
       const idea = generateIdeaMarkdown(cleaned);
 
-      fetch("/api/ideas", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: idea.title,
-          filename: idea.filename,
-          markdown: idea.markdown,
-        }),
-      }).catch((err) => console.error("Failed to save idea:", err));
+      try {
+        const res = await fetch("/api/ideas", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: idea.title,
+            filename: idea.filename,
+            markdown: idea.markdown,
+          }),
+        });
 
-      setState("saved");
-      setTimeout(() => setState("idle"), 1200);
+        if (!res.ok) throw new Error(`Save failed with status ${res.status}`);
+
+        setState("saved");
+        setTimeout(() => setState("idle"), 1200);
+      } catch (err) {
+        console.error("Failed to save idea:", err);
+        setErrorMessage(ERROR_MESSAGES["save-failed"]);
+        setState("error");
+      }
     },
     onError: (error) => {
       setErrorMessage(ERROR_MESSAGES[error] ?? "something went wrong");
@@ -74,11 +93,13 @@ export function CaptureScreen() {
       ? "tap to capture"
       : state === "listening"
         ? "listening"
-        : state === "saved"
-          ? "saved"
-          : state === "empty"
-            ? "didn't catch anything"
-            : errorMessage;
+        : state === "saving"
+          ? "saving…"
+          : state === "saved"
+            ? "saved"
+            : state === "empty"
+              ? "didn't catch anything"
+              : errorMessage;
 
   if (loading) {
     return null;
@@ -154,6 +175,7 @@ export function CaptureScreen() {
             <button
               onClick={handleTap}
               aria-label={label}
+              disabled={state === "saving"}
               style={{
                 width: 88,
                 height: 88,
@@ -166,7 +188,7 @@ export function CaptureScreen() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                cursor: "pointer",
+                cursor: state === "saving" ? "default" : "pointer",
               }}
             >
               {state === "saved" ? (
