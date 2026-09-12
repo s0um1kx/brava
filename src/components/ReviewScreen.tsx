@@ -7,6 +7,7 @@ import {
   IconCheck,
   IconBrandGoogle,
   IconCopy,
+  IconTrash,
 } from "@tabler/icons-react";
 import { Idea } from "@/lib/types";
 import { groupIdeasByDate } from "@/lib/groupIdeasByDate";
@@ -85,10 +86,12 @@ function IdeaDetailPanel({
   idea,
   detail,
   onToggleReviewed,
+  onDelete,
 }: {
   idea: Idea;
   detail: IdeaDetail | null;
   onToggleReviewed: () => void;
+  onDelete: () => void;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -97,6 +100,12 @@ function IdeaDetailPanel({
     await navigator.clipboard.writeText(detail.body);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
+  };
+
+  const handleDelete = () => {
+    if (window.confirm(`Delete "${idea.title}"? This can't be undone.`)) {
+      onDelete();
+    }
   };
 
   return (
@@ -121,7 +130,7 @@ function IdeaDetailPanel({
           >
             {detail.body}
           </p>
-          <div style={{ display: "flex", gap: 16 }}>
+          <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
             <button
               onClick={handleCopy}
               style={{
@@ -151,6 +160,24 @@ function IdeaDetailPanel({
               }}
             >
               {detail.reviewed ? "mark unreviewed" : "mark reviewed"}
+            </button>
+            <button
+              onClick={handleDelete}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                fontSize: 13,
+                color: "var(--text-warning)",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                padding: 0,
+                marginLeft: "auto",
+              }}
+            >
+              <IconTrash size={14} stroke={1.75} />
+              delete
             </button>
           </div>
         </>
@@ -219,6 +246,23 @@ export function ReviewScreen() {
       );
     } catch (err) {
       console.error("Failed to update reviewed status:", err);
+    }
+  };
+
+  const handleDelete = async (idea: Idea) => {
+    try {
+      const res = await fetch(`/api/ideas/${idea.id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error(`Failed with status ${res.status}`);
+
+      setIdeas((prev) => prev.filter((i) => i.id !== idea.id));
+      setDetailsById((prev) => {
+        const next = { ...prev };
+        delete next[idea.id];
+        return next;
+      });
+      setExpandedId(null);
+    } catch (err) {
+      console.error("Failed to delete idea:", err);
     }
   };
 
@@ -303,6 +347,7 @@ export function ReviewScreen() {
                   idea={idea}
                   detail={detailsById[idea.id] ?? null}
                   onToggleReviewed={() => handleToggleReviewed(idea)}
+                  onDelete={() => handleDelete(idea)}
                 />
               )}
             </div>

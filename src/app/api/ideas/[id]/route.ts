@@ -62,3 +62,27 @@ export async function PATCH(
 
   return NextResponse.json({ id: row.id, reviewed: row.reviewed });
 }
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await getSession();
+  if (!session) {
+    return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  }
+
+  const { id } = await params;
+
+  const [row] = await sql`
+    DELETE FROM ideas
+    WHERE id = ${id} AND user_id = ${session.userId}
+    RETURNING id
+  `;
+
+  if (!row) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  return NextResponse.json({ id: row.id });
+}
