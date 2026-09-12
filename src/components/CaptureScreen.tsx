@@ -56,10 +56,25 @@ export function CaptureScreen() {
         padding: "1.5rem",
       }}
     >
-      <div style={{ width: "100%" }}>
+      <div
+        style={{
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
         <span style={{ fontSize: 13, fontWeight: 500, color: "var(--text-secondary)" }}>
           brava
         </span>
+        {user && (
+          <a
+            href="/api/auth/logout"
+            style={{ fontSize: 13, color: "var(--text-muted)" }}
+          >
+            sign out
+          </a>
+        )}
       </div>
 
       {!user ? (
