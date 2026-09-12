@@ -72,7 +72,7 @@ export function CaptureScreen() {
 
       {!signedIn ? (
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
-          
+          <a
             href="/api/auth/login"
             aria-label="Sign in with Google"
             style={{
