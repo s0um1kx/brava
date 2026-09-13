@@ -18,11 +18,17 @@ const ERROR_MESSAGES: Record<string, string> = {
 
 const PULSE_THROTTLE_MS = 400;
 
-// Brand palette for this screen only — a warm, premium accent layered on
-// top of the same neutral surfaces the rest of the app uses.
 const HEADLINE_COLOR = "#7A2020";
-const GLOW_BACKGROUND =
-  "radial-gradient(circle at 50% 38%, rgba(255, 186, 122, 0.45) 0%, rgba(255, 214, 170, 0.22) 35%, rgba(255,255,255,0) 68%), var(--surface-2)";
+const ARROW_COLOR = "#B87A3D";
+
+// A restrained top-down warm tint instead of a centered glowing blob —
+// the "glow orb" look is the specific thing that reads as generic/AI-made.
+// A subtle grain layer on top keeps the gradient from looking too smooth
+// and synthetic.
+const BACKGROUND_GRADIENT =
+  "linear-gradient(180deg, #FBEADA 0%, #FCF6EF 45%, var(--surface-2) 100%)";
+const GRAIN_OVERLAY =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E\")";
 
 const PILL_STYLES: Record<CaptureState, { bg: string; color: string; border: string }> = {
   idle: { bg: "var(--text-primary)", color: "var(--surface-2)", border: "none" },
@@ -122,7 +128,7 @@ export function CaptureScreen() {
         flexDirection: "column",
         justifyContent: "space-between",
         padding: "1.75rem 1.5rem",
-        background: GLOW_BACKGROUND,
+        background: `${GRAIN_OVERLAY}, ${BACKGROUND_GRADIENT}`,
       }}
     >
       <div
@@ -163,14 +169,41 @@ export function CaptureScreen() {
         </p>
       </div>
 
-      <div style={{ position: "relative" }}>
+      {state === "idle" && (
+        <svg
+          width="56"
+          height="90"
+          viewBox="0 0 56 90"
+          fill="none"
+          style={{ alignSelf: "center", marginBottom: -8 }}
+          aria-hidden="true"
+        >
+          <path
+            d="M14 6 C 30 2, 34 16, 20 20 C 8 24, 6 34, 18 40 C 32 47, 34 60, 24 72"
+            stroke={ARROW_COLOR}
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            fill="none"
+          />
+          <path
+            d="M14 62 L 24 78 L 34 64"
+            stroke={ARROW_COLOR}
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            fill="none"
+          />
+        </svg>
+      )}
+
+      <div style={{ position: "relative", display: "flex", justifyContent: "center" }}>
         {state === "listening" && (
           <div
             key={pulseCount}
             style={{
               position: "absolute",
-              inset: -4,
-              borderRadius: 30,
+              inset: "-4px 20%",
+              borderRadius: 26,
               border: "2px solid var(--text-accent)",
               animation: "brava-pulse 0.6s ease-out",
               pointerEvents: "none",
@@ -186,16 +219,17 @@ export function CaptureScreen() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            width: "100%",
-            height: 54,
-            borderRadius: 27,
+            width: "60%",
+            minWidth: 180,
+            height: 46,
+            borderRadius: 23,
             background: !user ? "var(--text-primary)" : pillStyle.bg,
             color: !user ? "var(--surface-2)" : pillStyle.color,
             border: !user ? "none" : pillStyle.border,
-            fontSize: 15,
+            fontSize: 14,
             fontWeight: 600,
             textDecoration: "none",
-            boxShadow: "0 8px 20px rgba(0, 0, 0, 0.16)",
+            boxShadow: "0 6px 16px rgba(0, 0, 0, 0.16)",
             cursor: state === "saving" || state === "saved" ? "default" : "pointer",
             pointerEvents: state === "saving" || state === "saved" ? "none" : "auto",
           }}
