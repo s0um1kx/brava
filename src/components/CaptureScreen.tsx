@@ -185,6 +185,7 @@ export function CaptureScreen() {
           onClick={user ? handleTap : undefined}
           role="button"
           aria-disabled={state === "saving" || state === "saved"}
+          className="brava-cta"
           style={{
             display: "flex",
             alignItems: "center",
@@ -199,7 +200,7 @@ export function CaptureScreen() {
             fontSize: 14,
             fontWeight: 600,
             textDecoration: "none",
-            boxShadow: "0 6px 16px rgba(0, 0, 0, 0.16)",
+            boxShadow: "0 1px 2px rgba(0, 0, 0, 0.06), 0 8px 20px rgba(0, 0, 0, 0.08)",
             cursor: state === "saving" || state === "saved" ? "default" : "pointer",
             pointerEvents: state === "saving" || state === "saved" ? "none" : "auto",
           }}

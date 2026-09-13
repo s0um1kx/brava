@@ -40,3 +40,11 @@ body {
     transform: translateY(8px);
   }
 }
+.brava-cta {
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s cubic-bezier(0.2, 0, 0.2, 1);
+}
+
+.brava-cta:active {
+  transform: scale(0.96);
+}
