@@ -18,6 +18,12 @@ const ERROR_MESSAGES: Record<string, string> = {
 
 const PULSE_THROTTLE_MS = 400;
 
+// Brand palette for this screen only — a warm, premium accent layered on
+// top of the same neutral surfaces the rest of the app uses.
+const HEADLINE_COLOR = "#7A2020";
+const GLOW_BACKGROUND =
+  "radial-gradient(circle at 50% 38%, rgba(255, 186, 122, 0.45) 0%, rgba(255, 214, 170, 0.22) 35%, rgba(255,255,255,0) 68%), var(--surface-2)";
+
 const PILL_STYLES: Record<CaptureState, { bg: string; color: string; border: string }> = {
   idle: { bg: "var(--text-primary)", color: "var(--surface-2)", border: "none" },
   listening: { bg: "var(--bg-accent)", color: "var(--text-accent)", border: "none" },
@@ -115,7 +121,8 @@ export function CaptureScreen() {
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
-        padding: "1.5rem",
+        padding: "1.75rem 1.5rem",
+        background: GLOW_BACKGROUND,
       }}
     >
       <div
@@ -136,41 +143,25 @@ export function CaptureScreen() {
         )}
       </div>
 
-      {!user ? (
-        <div>
-          <p
-            style={{
-              fontSize: 20,
-              fontWeight: 500,
-              color: "var(--text-primary)",
-              margin: "0 0 8px",
-              lineHeight: 1.3,
-            }}
-          >
-            Say it before it&apos;s gone.
-          </p>
-          <p style={{ fontSize: 13, color: "var(--text-secondary)", margin: "0 0 24px", lineHeight: 1.5 }}>
-            Sign in to start capturing your ideas.
-          </p>
-        </div>
-      ) : (
-        <div>
-          <p
-            style={{
-              fontSize: 20,
-              fontWeight: 500,
-              color: "var(--text-primary)",
-              margin: "0 0 8px",
-              lineHeight: 1.3,
-            }}
-          >
-            Say it before it&apos;s gone.
-          </p>
-          <p style={{ fontSize: 13, color: "var(--text-secondary)", margin: 0, lineHeight: 1.5 }}>
-            We&apos;ll clean it up and have it waiting for you.
-          </p>
-        </div>
-      )}
+      <div>
+        <p
+          style={{
+            fontSize: 26,
+            fontWeight: 700,
+            color: HEADLINE_COLOR,
+            margin: "0 0 10px",
+            lineHeight: 1.25,
+            letterSpacing: "-0.01em",
+          }}
+        >
+          Say it before it&apos;s gone.
+        </p>
+        <p style={{ fontSize: 14, color: "var(--text-secondary)", margin: 0, lineHeight: 1.5 }}>
+          {!user
+            ? "Sign in to start capturing your ideas."
+            : "We'll clean it up and have it waiting for you."}
+        </p>
+      </div>
 
       <div style={{ position: "relative" }}>
         {state === "listening" && (
@@ -196,14 +187,15 @@ export function CaptureScreen() {
             alignItems: "center",
             justifyContent: "center",
             width: "100%",
-            height: 52,
-            borderRadius: 26,
+            height: 54,
+            borderRadius: 27,
             background: !user ? "var(--text-primary)" : pillStyle.bg,
             color: !user ? "var(--surface-2)" : pillStyle.color,
             border: !user ? "none" : pillStyle.border,
-            fontSize: 14,
-            fontWeight: 500,
+            fontSize: 15,
+            fontWeight: 600,
             textDecoration: "none",
+            boxShadow: "0 8px 20px rgba(0, 0, 0, 0.16)",
             cursor: state === "saving" || state === "saved" ? "default" : "pointer",
             pointerEvents: state === "saving" || state === "saved" ? "none" : "auto",
           }}
