@@ -19,7 +19,6 @@ const ERROR_MESSAGES: Record<string, string> = {
 const PULSE_THROTTLE_MS = 400;
 
 const HEADLINE_COLOR = "#7A2020";
-const ARROW_COLOR = "#B87A3D";
 
 const BACKGROUND_GRADIENT =
   "linear-gradient(180deg, #FBEADA 0%, #FCF6EF 45%, var(--surface-2) 100%)";
@@ -166,37 +165,6 @@ export function CaptureScreen() {
             : "We'll clean it up and have it waiting for you."}
         </p>
       </div>
-
-      {state === "idle" && (
-        // Looped top, straight stem, single arrowhead — matches the
-        // reference sketch. The bounce animation gives it a gentle,
-        // continuous "tap here" nudge rather than sitting inert.
-        <div
-          style={{
-            alignSelf: "center",
-            marginBottom: -4,
-            animation: "brava-arrow-bounce 1.6s ease-in-out infinite",
-          }}
-        >
-          <svg width="48" height="80" viewBox="0 0 48 80" fill="none" aria-hidden="true">
-            <path
-              d="M12 12 C 34 2, 38 22, 20 24 C 6 26, 10 36, 26 34 L 26 62"
-              stroke={ARROW_COLOR}
-              strokeWidth="2"
-              strokeLinecap="round"
-              fill="none"
-            />
-            <path
-              d="M18 54 L 26 68 L 34 52"
-              stroke={ARROW_COLOR}
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              fill="none"
-            />
-          </svg>
-        </div>
-      )}
 
       <div style={{ position: "relative", display: "flex", justifyContent: "center" }}>
         {state === "listening" && (
