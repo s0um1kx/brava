@@ -168,33 +168,34 @@ export function CaptureScreen() {
       </div>
 
       {state === "idle" && (
-        // A single deliberate curve, one arrowhead — the goal is one
-        // confident gesture, not a scribble. Consistent 2px stroke,
-        // rounded caps, no loops.
-        <svg
-          width="64"
-          height="72"
-          viewBox="0 0 64 72"
-          fill="none"
-          style={{ alignSelf: "center", marginBottom: -4 }}
-          aria-hidden="true"
+        // Looped top, straight stem, single arrowhead — matches the
+        // reference sketch. The bounce animation gives it a gentle,
+        // continuous "tap here" nudge rather than sitting inert.
+        <div
+          style={{
+            alignSelf: "center",
+            marginBottom: -4,
+            animation: "brava-arrow-bounce 1.6s ease-in-out infinite",
+          }}
         >
-          <path
-            d="M16 4 C 42 8, 42 32, 18 36 C -2 39, 0 56, 20 60"
-            stroke={ARROW_COLOR}
-            strokeWidth="2"
-            strokeLinecap="round"
-            fill="none"
-          />
-          <path
-            d="M10 54 L 20 66 L 32 52"
-            stroke={ARROW_COLOR}
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            fill="none"
-          />
-        </svg>
+          <svg width="48" height="80" viewBox="0 0 48 80" fill="none" aria-hidden="true">
+            <path
+              d="M12 12 C 34 2, 38 22, 20 24 C 6 26, 10 36, 26 34 L 26 62"
+              stroke={ARROW_COLOR}
+              strokeWidth="2"
+              strokeLinecap="round"
+              fill="none"
+            />
+            <path
+              d="M18 54 L 26 68 L 34 52"
+              stroke={ARROW_COLOR}
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="none"
+            />
+          </svg>
+        </div>
       )}
 
       <div style={{ position: "relative", display: "flex", justifyContent: "center" }}>
