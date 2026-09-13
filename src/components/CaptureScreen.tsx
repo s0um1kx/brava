@@ -129,9 +129,9 @@ export function CaptureScreen() {
           justifyContent: "space-between",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <BrandMark size={14} color="var(--text-primary)" />
-          <span style={{ fontSize: 13, fontWeight: 600, letterSpacing: 1, color: "var(--text-primary)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <BrandMark size={20} color="var(--text-primary)" />
+          <span style={{ fontSize: 16, fontWeight: 600, letterSpacing: 1, color: "var(--text-primary)" }}>
             brava
           </span>
         </div>
