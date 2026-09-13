@@ -21,10 +21,6 @@ const PULSE_THROTTLE_MS = 400;
 const HEADLINE_COLOR = "#7A2020";
 const ARROW_COLOR = "#B87A3D";
 
-// A restrained top-down warm tint instead of a centered glowing blob —
-// the "glow orb" look is the specific thing that reads as generic/AI-made.
-// A subtle grain layer on top keeps the gradient from looking too smooth
-// and synthetic.
 const BACKGROUND_GRADIENT =
   "linear-gradient(180deg, #FBEADA 0%, #FCF6EF 45%, var(--surface-2) 100%)";
 const GRAIN_OVERLAY =
@@ -127,7 +123,9 @@ export function CaptureScreen() {
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
-        padding: "1.75rem 1.5rem",
+        // Extra bottom padding lifts the whole CTA block off the very edge
+        // of the screen, into comfortable one-thumb reach.
+        padding: "1.75rem 1.5rem 4.5rem",
         background: `${GRAIN_OVERLAY}, ${BACKGROUND_GRADIENT}`,
       }}
     >
@@ -170,25 +168,28 @@ export function CaptureScreen() {
       </div>
 
       {state === "idle" && (
+        // A single deliberate curve, one arrowhead — the goal is one
+        // confident gesture, not a scribble. Consistent 2px stroke,
+        // rounded caps, no loops.
         <svg
-          width="56"
-          height="90"
-          viewBox="0 0 56 90"
+          width="64"
+          height="72"
+          viewBox="0 0 64 72"
           fill="none"
-          style={{ alignSelf: "center", marginBottom: -8 }}
+          style={{ alignSelf: "center", marginBottom: -4 }}
           aria-hidden="true"
         >
           <path
-            d="M14 6 C 30 2, 34 16, 20 20 C 8 24, 6 34, 18 40 C 32 47, 34 60, 24 72"
+            d="M16 4 C 42 8, 42 32, 18 36 C -2 39, 0 56, 20 60"
             stroke={ARROW_COLOR}
-            strokeWidth="2.5"
+            strokeWidth="2"
             strokeLinecap="round"
             fill="none"
           />
           <path
-            d="M14 62 L 24 78 L 34 64"
+            d="M10 54 L 20 66 L 32 52"
             stroke={ARROW_COLOR}
-            strokeWidth="2.5"
+            strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
             fill="none"
