@@ -12,6 +12,7 @@ import {
 import { Idea } from "@/lib/types";
 import { groupIdeasByDate } from "@/lib/groupIdeasByDate";
 import { useAuth } from "@/hooks/useAuth";
+import { BrandMark } from "@/components/BrandMark";
 
 interface IdeaDetail {
   body: string;
@@ -274,15 +275,18 @@ export function ReviewScreen() {
         style={{
           display: "flex",
           alignItems: "center",
-          justifyContent: "flex-end",
-          gap: 6,
-          marginBottom: 12,
-          fontSize: 13,
-          color: "var(--text-muted)",
+          justifyContent: "space-between",
+          marginBottom: 20,
         }}
       >
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <BrandMark size={14} color="var(--text-primary)" />
+          <span style={{ fontSize: 13, fontWeight: 600, letterSpacing: 1, color: "var(--text-primary)" }}>
+            brava
+          </span>
+        </div>
         {loadingAuth ? null : user ? (
-          <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-muted)" }}>
             {user.email}{" "}
             <a href="/api/auth/logout" style={{ color: "var(--text-secondary)" }}>
               sign out
@@ -291,7 +295,7 @@ export function ReviewScreen() {
         ) : (
           <a
             href="/api/auth/login"
-            style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--text-accent)" }}
+            style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-accent)" }}
           >
             <IconBrandGoogle size={14} stroke={1.75} />
             sign in with google

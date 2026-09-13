@@ -5,6 +5,7 @@ import { useSpeechCapture } from "@/hooks/useSpeechCapture";
 import { cleanTranscript } from "@/lib/cleanTranscript";
 import { generateIdeaMarkdown } from "@/lib/generateIdeaMarkdown";
 import { useAuth } from "@/hooks/useAuth";
+import { BrandMark } from "@/components/BrandMark";
 
 type CaptureState = "idle" | "listening" | "saving" | "saved" | "empty" | "error";
 
@@ -16,14 +17,8 @@ const ERROR_MESSAGES: Record<string, string> = {
   "save-failed": "couldn't save — tap to retry",
 };
 
-const PULSE_THROTTLE_MS = 400;
-
-const HEADLINE_COLOR = "#7A2020";
-
-const BACKGROUND_GRADIENT =
-  "linear-gradient(180deg, #FBEADA 0%, #FCF6EF 45%, var(--surface-2) 100%)";
 const GRAIN_OVERLAY =
-  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E\")";
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E\")";
 
 const PILL_STYLES: Record<CaptureState, { bg: string; color: string; border: string }> = {
   idle: { bg: "var(--text-primary)", color: "var(--surface-2)", border: "none" },
@@ -44,7 +39,7 @@ export function CaptureScreen() {
   const { start, stop } = useSpeechCapture({
     onSoundDetected: () => {
       const now = Date.now();
-      if (now - lastPulseRef.current > PULSE_THROTTLE_MS) {
+      if (now - lastPulseRef.current > 400) {
         lastPulseRef.current = now;
         setPulseCount((c) => c + 1);
       }
@@ -92,7 +87,7 @@ export function CaptureScreen() {
       setState("listening");
       start();
     } else if (state === "listening") {
-      stop(); // onEnded above takes it from here
+      stop();
     }
   };
 
@@ -122,10 +117,8 @@ export function CaptureScreen() {
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
-        // Extra bottom padding lifts the whole CTA block off the very edge
-        // of the screen, into comfortable one-thumb reach.
         padding: "1.75rem 1.5rem 4.5rem",
-        background: `${GRAIN_OVERLAY}, ${BACKGROUND_GRADIENT}`,
+        background: `${GRAIN_OVERLAY}, var(--surface-2)`,
       }}
     >
       <div
@@ -136,9 +129,12 @@ export function CaptureScreen() {
           justifyContent: "space-between",
         }}
       >
-        <span style={{ fontSize: 13, fontWeight: 500, color: "var(--text-secondary)" }}>
-          brava
-        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <BrandMark size={14} color="var(--text-primary)" />
+          <span style={{ fontSize: 13, fontWeight: 600, letterSpacing: 1, color: "var(--text-primary)" }}>
+            brava
+          </span>
+        </div>
         {user && (
           <a href="/api/auth/logout" style={{ fontSize: 13, color: "var(--text-muted)" }}>
             sign out
@@ -151,7 +147,7 @@ export function CaptureScreen() {
           style={{
             fontSize: 26,
             fontWeight: 700,
-            color: HEADLINE_COLOR,
+            color: "var(--text-primary)",
             margin: "0 0 10px",
             lineHeight: 1.25,
             letterSpacing: "-0.01em",

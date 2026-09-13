@@ -1,11 +1,11 @@
 :root {
   --surface-1: #ffffff;
-  --surface-2: #fafaf9;
-  --border: #e5e3de;
-  --border-strong: #c9c6bd;
-  --text-primary: #1a1a18;
-  --text-secondary: #6b6a64;
-  --text-muted: #9c9a92;
+  --surface-2: #F2ECE1;
+  --border: #E7DFD1;
+  --border-strong: #CBBBA0;
+  --text-primary: #171412;
+  --text-secondary: #5B5347;
+  --text-muted: #948A7A;
   --bg-accent: #e1f5ee;
   --text-accent: #0f6e56;
   --text-warning: #ba7517;
@@ -22,6 +22,7 @@ body {
   color: var(--text-primary);
   background: var(--surface-2);
 }
+
 @keyframes brava-pulse {
   0% {
     transform: scale(1);
@@ -32,6 +33,7 @@ body {
     opacity: 0;
   }
 }
+
 @keyframes brava-arrow-bounce {
   0%, 100% {
     transform: translateY(0);
@@ -40,6 +42,7 @@ body {
     transform: translateY(8px);
   }
 }
+
 .brava-cta {
   -webkit-tap-highlight-color: transparent;
   transition: transform 0.15s cubic-bezier(0.2, 0, 0.2, 1);
