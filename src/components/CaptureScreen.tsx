@@ -14,6 +14,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   "audio-capture": "no microphone found — tap to retry",
   network: "connection issue — tap to retry",
   "not-supported": "speech recognition isn't supported here",
+  "insecure-context": "mic requires secure context. use https or localhost.",
   "save-failed": "couldn't save — tap to retry",
 };
 
@@ -21,7 +22,7 @@ const GRAIN_OVERLAY =
   "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E\")";
 
 const PILL_STYLES: Record<CaptureState, { bg: string; color: string; border: string }> = {
-  idle: { bg: "var(--text-primary)", color: "var(--surface-2)", border: "none" },
+  idle: { bg: "var(--text-primary)", color: "var(--surface-1)", border: "none" },
   listening: { bg: "var(--bg-accent)", color: "var(--text-accent)", border: "none" },
   saving: { bg: "var(--surface-1)", color: "var(--text-muted)", border: "0.5px solid var(--border-strong)" },
   saved: { bg: "var(--surface-1)", color: "var(--text-success)", border: "0.5px solid var(--border)" },
@@ -145,12 +146,12 @@ export function CaptureScreen() {
       <div>
         <p
           style={{
-            fontSize: 26,
-            fontWeight: 700,
+            fontSize: 22,
+            fontWeight: 600,
             color: "var(--text-primary)",
             margin: "0 0 10px",
-            lineHeight: 1.25,
-            letterSpacing: "-0.01em",
+            lineHeight: 1.3,
+            letterSpacing: "-0.02em",
           }}
         >
           Say it before it&apos;s gone.
@@ -191,12 +192,12 @@ export function CaptureScreen() {
             height: 46,
             borderRadius: 23,
             background: !user ? "var(--text-primary)" : pillStyle.bg,
-            color: !user ? "var(--surface-2)" : pillStyle.color,
+            color: !user ? "var(--surface-1)" : pillStyle.color,
             border: !user ? "none" : pillStyle.border,
             fontSize: 14,
             fontWeight: 600,
             textDecoration: "none",
-            boxShadow: "0 1px 2px rgba(0, 0, 0, 0.06), 0 8px 20px rgba(0, 0, 0, 0.08)",
+            boxShadow: "0 8px 24px rgba(0, 0, 0, 0.08)",
             cursor: state === "saving" || state === "saved" ? "default" : "pointer",
             pointerEvents: state === "saving" || state === "saved" ? "none" : "auto",
           }}

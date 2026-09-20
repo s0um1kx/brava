@@ -192,6 +192,7 @@ export function ReviewScreen() {
   const [loadingIdeas, setLoadingIdeas] = useState(true);
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [detailsById, setDetailsById] = useState<Record<number, IdeaDetail>>({});
+  const [searchQuery, setSearchQuery] = useState("");
   const { user, loading: loadingAuth } = useAuth();
 
   useEffect(() => {
@@ -267,7 +268,15 @@ export function ReviewScreen() {
     }
   };
 
-  const groups = groupIdeasByDate(ideas);
+  const filteredIdeas = searchQuery.trim()
+    ? ideas.filter(
+        (idea) =>
+          idea.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          idea.preview.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : ideas;
+
+  const groups = groupIdeasByDate(filteredIdeas);
 
   return (
     <div style={{ maxWidth: 560, margin: "0 auto", padding: "1.5rem 1rem" }}>
@@ -311,13 +320,25 @@ export function ReviewScreen() {
           height: 36,
           padding: "0 12px",
           border: "0.5px solid var(--border)",
-          borderRadius: 8,
+          borderRadius: 10,
           background: "var(--surface-1)",
           marginBottom: 20,
         }}
       >
         <IconSearch size={16} color="var(--text-muted)" stroke={1.75} />
-        <span style={{ fontSize: 14, color: "var(--text-muted)" }}>search ideas</span>
+        <input
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="search ideas"
+          style={{
+            border: "none",
+            outline: "none",
+            background: "transparent",
+            fontSize: 14,
+            color: "var(--text-primary)",
+            width: "100%",
+          }}
+        />
       </div>
 
       {!loadingIdeas && ideas.length === 0 && (
@@ -326,15 +347,26 @@ export function ReviewScreen() {
         </p>
       )}
 
+      {!loadingIdeas && ideas.length > 0 && filteredIdeas.length === 0 && (
+        <div style={{ padding: "0 4px" }}>
+          <p style={{ fontSize: 14, color: "var(--text-primary)", margin: 0 }}>no ideas match</p>
+          <p style={{ fontSize: 13, color: "var(--text-muted)", margin: "2px 0 0" }}>
+            try a different search
+          </p>
+        </div>
+      )}
+
       {groups.map((group) => (
         <div key={group.label}>
           <p
             style={{
-              fontSize: 13,
-              fontWeight: 500,
+              fontSize: 11,
+              fontWeight: 600,
               color: "var(--text-muted)",
               margin: "20px 0 4px",
               padding: "0 4px",
+              textTransform: "uppercase",
+              letterSpacing: "0.08em",
             }}
           >
             {group.label}

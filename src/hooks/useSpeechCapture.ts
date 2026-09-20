@@ -83,6 +83,11 @@ export function useSpeechCapture(options: UseSpeechCaptureOptions = {}) {
   }, []);
 
   const start = useCallback(() => {
+    if (!window.isSecureContext) {
+      optionsRef.current.onError?.("insecure-context");
+      return;
+    }
+
     const recognition = createRecognition();
     if (!recognition) {
       optionsRef.current.onError?.("not-supported");
