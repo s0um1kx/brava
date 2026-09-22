@@ -1,17 +1,20 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif&family=Geist+Mono:wght@400;500&display=swap');
 
 :root {
   --surface-1: #FFFFFF;
-  --surface-2: #FAF9F6;
-  --border: #E8E5DE;
-  --border-strong: #D6D2CA;
-  --text-primary: #111110;
-  --text-secondary: #6B6B66;
-  --text-muted: #9A9A93;
-  --bg-accent: #B4FF39;
-  --text-accent: #111110;
+  --surface-2: #FAF6EF;
+  --surface-hover: #F7F2E8;
+  --border: rgba(37, 69, 216, 0.10);
+  --border-strong: rgba(37, 69, 216, 0.18);
+  --text-primary: #12131A;
+  --text-secondary: #6B6E7A;
+  --text-muted: #9CA0AF;
+  --bg-accent: #2545D8;
+  --bg-accent-hover: #1E32C3;
+  --text-accent: #FFFFFF;
+  --text-danger: #C23C2A;
   --text-warning: #EAB308;
-  --text-success: #5C7A1B;
+  --text-success: #2545D8;
 }
 
 * {
@@ -25,6 +28,11 @@ body {
   background: var(--surface-2);
 }
 
+::selection {
+  background: var(--bg-accent);
+  color: #FFFFFF;
+}
+
 @keyframes brava-pulse {
   0% {
     transform: scale(1);
@@ -36,6 +44,15 @@ body {
   }
 }
 
+@keyframes pulse-white {
+  0%, 100% {
+    box-shadow: 0 0 0 rgba(255, 255, 255, 0);
+  }
+  50% {
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.65);
+  }
+}
+
 .brava-cta {
   -webkit-tap-highlight-color: transparent;
   transition: transform 0.15s cubic-bezier(0.2, 0, 0.2, 1);
@@ -43,4 +60,12 @@ body {
 
 .brava-cta:active {
   transform: scale(0.96);
+}
+
+.brava-lift {
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.brava-lift:hover {
+  transform: translateY(-2px);
 }
