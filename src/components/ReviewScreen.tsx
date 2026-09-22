@@ -3,16 +3,14 @@
 import { useEffect, useState } from "react";
 import {
   IconSearch,
-  IconCheck,
-  IconBrandGoogle,
+  IconHome,
+  IconSettings,
   IconCopy,
   IconTrash,
   IconX,
 } from "@tabler/icons-react";
 import { Idea } from "@/lib/types";
-import { groupIdeasByDate } from "@/lib/groupIdeasByDate";
 import { useAuth } from "@/hooks/useAuth";
-import { BrandMark } from "@/components/BrandMark";
 
 interface IdeaDetail {
   body: string;
@@ -23,161 +21,134 @@ function formatTime(iso: string): string {
   return new Date(iso).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
 }
 
-function StatusDot({ reviewed }: { reviewed: boolean }) {
-  if (reviewed) {
-    return (
-      <span
-        style={{
-          height: 14,
-          width: 14,
-          borderRadius: "50%",
-          border: "0.5px solid rgba(37,69,216,0.15)",
-          background: "var(--surface-hover)",
-          display: "grid",
-          placeItems: "center",
-          flexShrink: 0,
-        }}
-      >
-        <IconCheck size={9} color="var(--bg-accent)" stroke={2.5} />
-      </span>
-    );
-  }
-  return (
-    <span
-      style={{
-        height: 8,
-        width: 8,
-        borderRadius: "50%",
-        background: "var(--bg-accent)",
-        flexShrink: 0,
-        animation: "pulse-white 2s ease-in-out infinite",
-      }}
-    />
-  );
-}
-
-function IdeaRow({
+function IdeaCard({
   idea,
   expanded,
-  onToggle,
-}: {
-  idea: Idea;
-  expanded: boolean;
-  onToggle: () => void;
-}) {
-  return (
-    <div
-      onClick={onToggle}
-      className="brava-lift"
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 10,
-        padding: "12px 10px",
-        borderRadius: 10,
-        borderBottom: expanded ? "none" : "1px solid var(--border)",
-        cursor: "pointer",
-      }}
-    >
-      <StatusDot reviewed={idea.reviewed} />
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <p
-          style={{
-            fontFamily: "Inter, sans-serif",
-            fontSize: 13.5,
-            fontWeight: 500,
-            margin: 0,
-            color: idea.reviewed ? "var(--text-secondary)" : "var(--text-primary)",
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-          }}
-        >
-          {idea.title}
-        </p>
-        <p
-          style={{
-            fontSize: 12,
-            margin: "2px 0 0",
-            color: idea.reviewed ? "var(--text-muted)" : "var(--text-secondary)",
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-          }}
-        >
-          {idea.preview}
-        </p>
-      </div>
-      <span
-        style={{
-          fontFamily: "'Geist Mono', ui-monospace, monospace",
-          fontSize: 10,
-          fontVariantNumeric: "tabular-nums",
-          color: "var(--text-muted)",
-          flexShrink: 0,
-        }}
-      >
-        {formatTime(idea.createdAt)}
-      </span>
-    </div>
-  );
-}
-
-function IdeaDetailPanel({
-  idea,
   detail,
+  onToggle,
   onToggleReviewed,
   onDelete,
 }: {
   idea: Idea;
+  expanded: boolean;
   detail: IdeaDetail | null;
+  onToggle: () => void;
   onToggleReviewed: () => void;
   onDelete: () => void;
 }) {
   const [copied, setCopied] = useState(false);
+  const unreviewed = !idea.reviewed;
 
-  const handleCopy = async () => {
+  const handleCopy = async (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (!detail) return;
     await navigator.clipboard.writeText(detail.body);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   };
 
-  const handleDelete = () => {
-    if (window.confirm("Delete this idea permanently?")) {
-      onDelete();
-    }
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (window.confirm("Delete this idea permanently?")) onDelete();
+  };
+
+  const handleToggleReviewed = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onToggleReviewed();
   };
 
   return (
     <div
+      onClick={onToggle}
+      className="brava-lift"
       style={{
-        padding: "4px 10px 16px",
-        borderBottom: "1px solid var(--border)",
+        breakInside: "avoid",
+        marginBottom: 2,
+        padding: "16px 18px",
+        cursor: "pointer",
+        background: unreviewed ? "var(--bg-accent)" : "var(--surface-1)",
+        color: unreviewed ? "#FFFFFF" : "var(--text-primary)",
       }}
     >
-      {!detail ? (
-        <p style={{ fontSize: 13, color: "var(--text-muted)" }}>loading…</p>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <span
+            style={{
+              width: 16,
+              height: 16,
+              borderRadius: 3,
+              display: "grid",
+              placeItems: "center",
+              background: unreviewed ? "rgba(255,255,255,0.18)" : "var(--surface-hover)",
+            }}
+          >
+            <span
+              style={{
+                width: 5,
+                height: 5,
+                borderRadius: "50%",
+                background: unreviewed ? "#FFFFFF" : "var(--bg-accent)",
+              }}
+            />
+          </span>
+          <span
+            style={{
+              width: 5,
+              height: 5,
+              borderRadius: "50%",
+              background: unreviewed ? "rgba(255,255,255,0.4)" : "var(--border-strong)",
+            }}
+          />
+        </div>
+        <span
+          style={{
+            fontFamily: "'Geist Mono', ui-monospace, monospace",
+            fontSize: 10,
+            fontVariantNumeric: "tabular-nums",
+            color: unreviewed ? "rgba(255,255,255,0.7)" : "var(--text-muted)",
+          }}
+        >
+          {formatTime(idea.createdAt)}
+        </span>
+      </div>
+
+      <p style={{ fontSize: 15, fontWeight: 700, margin: "0 0 6px", lineHeight: 1.3 }}>{idea.title}</p>
+
+      {!expanded ? (
+        <p
+          style={{
+            fontSize: 13,
+            margin: 0,
+            lineHeight: 1.5,
+            color: unreviewed ? "rgba(255,255,255,0.7)" : "var(--text-secondary)",
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+          }}
+        >
+          {idea.preview}
+        </p>
       ) : (
         <>
           <p
             style={{
-              fontSize: 13.5,
+              fontSize: 13,
+              margin: "0 0 14px",
               lineHeight: 1.6,
-              color: "var(--text-primary)",
               whiteSpace: "pre-wrap",
-              margin: "8px 0 14px",
+              color: unreviewed ? "rgba(255,255,255,0.9)" : "var(--text-secondary)",
             }}
           >
-            {detail.body}
+            {detail ? detail.body : "loading…"}
           </p>
           <div
             style={{
               display: "flex",
-              gap: 16,
+              gap: 14,
               alignItems: "center",
-              paddingTop: 12,
-              borderTop: "1px solid var(--border)",
+              paddingTop: 10,
+              borderTop: unreviewed ? "1px solid rgba(255,255,255,0.18)" : "1px solid var(--border)",
             }}
           >
             <button
@@ -185,47 +156,47 @@ function IdeaDetailPanel({
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: 6,
-                fontSize: 12.5,
-                color: "var(--text-secondary)",
+                gap: 5,
+                fontSize: 12,
                 background: "none",
                 border: "none",
                 cursor: "pointer",
                 padding: 0,
+                color: unreviewed ? "rgba(255,255,255,0.85)" : "var(--text-secondary)",
               }}
             >
-              <IconCopy size={14} stroke={1.75} />
+              <IconCopy size={13} stroke={1.75} />
               {copied ? "copied" : "copy"}
             </button>
             <button
-              onClick={onToggleReviewed}
+              onClick={handleToggleReviewed}
               style={{
-                fontSize: 12.5,
-                color: "var(--text-secondary)",
+                fontSize: 12,
                 background: "none",
                 border: "none",
                 cursor: "pointer",
                 padding: 0,
+                color: unreviewed ? "rgba(255,255,255,0.85)" : "var(--text-secondary)",
               }}
             >
-              {detail.reviewed ? "mark unreviewed" : "mark reviewed"}
+              {idea.reviewed ? "mark unreviewed" : "mark reviewed"}
             </button>
             <button
               onClick={handleDelete}
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: 6,
-                fontSize: 12.5,
-                color: "var(--text-danger)",
+                gap: 5,
+                fontSize: 12,
                 background: "none",
                 border: "none",
                 cursor: "pointer",
                 padding: 0,
                 marginLeft: "auto",
+                color: unreviewed ? "#FFD9D2" : "var(--text-danger)",
               }}
             >
-              <IconTrash size={14} stroke={1.75} />
+              <IconTrash size={13} stroke={1.75} />
               delete
             </button>
           </div>
@@ -262,10 +233,7 @@ export function ReviewScreen() {
         const res = await fetch(`/api/ideas/${idea.id}`);
         if (!res.ok) throw new Error(`Failed with status ${res.status}`);
         const data = await res.json();
-        setDetailsById((prev) => ({
-          ...prev,
-          [idea.id]: { body: data.body, reviewed: data.reviewed },
-        }));
+        setDetailsById((prev) => ({ ...prev, [idea.id]: { body: data.body, reviewed: data.reviewed } }));
       } catch (err) {
         console.error("Failed to load idea detail:", err);
       }
@@ -273,9 +241,7 @@ export function ReviewScreen() {
   };
 
   const handleToggleReviewed = async (idea: Idea) => {
-    const current = detailsById[idea.id];
-    if (!current) return;
-    const nextReviewed = !current.reviewed;
+    const nextReviewed = !idea.reviewed;
     try {
       const res = await fetch(`/api/ideas/${idea.id}`, {
         method: "PATCH",
@@ -283,8 +249,10 @@ export function ReviewScreen() {
         body: JSON.stringify({ reviewed: nextReviewed }),
       });
       if (!res.ok) throw new Error(`Failed with status ${res.status}`);
-      setDetailsById((prev) => ({ ...prev, [idea.id]: { ...prev[idea.id], reviewed: nextReviewed } }));
       setIdeas((prev) => prev.map((i) => (i.id === idea.id ? { ...i, reviewed: nextReviewed } : i)));
+      setDetailsById((prev) =>
+        prev[idea.id] ? { ...prev, [idea.id]: { ...prev[idea.id], reviewed: nextReviewed } } : prev
+      );
     } catch (err) {
       console.error("Failed to update reviewed status:", err);
     }
@@ -314,54 +282,94 @@ export function ReviewScreen() {
       )
     : ideas;
 
-  const groups = groupIdeasByDate(filteredIdeas);
+  const unreviewedCount = ideas.filter((i) => !i.reviewed).length;
+
+  const gridBackground =
+    "repeating-linear-gradient(0deg, rgba(37,69,216,0.08) 0px, rgba(37,69,216,0.08) 1px, transparent 1px, transparent 44px)," +
+    "repeating-linear-gradient(90deg, rgba(37,69,216,0.08) 0px, rgba(37,69,216,0.08) 1px, transparent 1px, transparent 44px)," +
+    "var(--surface-2)";
 
   return (
-    <div style={{ minHeight: "100vh", width: "100%", background: "var(--surface-2)", color: "var(--text-primary)" }}>
+    <div style={{ minHeight: "100vh", width: "100%", background: gridBackground, color: "var(--text-primary)" }}>
+      {/* header */}
       <div
         style={{
+          borderTop: "3px solid var(--bg-accent)",
+          borderBottom: "1px solid var(--border)",
+          background: "rgba(250, 246, 239, 0.92)",
+          backdropFilter: "blur(10px)",
+          WebkitBackdropFilter: "blur(10px)",
           position: "sticky",
           top: 0,
           zIndex: 10,
-          background: "rgba(250, 246, 239, 0.9)",
-          backdropFilter: "blur(10px)",
-          WebkitBackdropFilter: "blur(10px)",
-          borderBottom: "1px solid var(--border)",
         }}
       >
-        <div style={{ maxWidth: 560, margin: "0 auto", padding: "16px 16px 12px" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <BrandMark size={20} color="var(--text-primary)" />
-              <span style={{ fontSize: 16, fontWeight: 600, letterSpacing: 1, color: "var(--text-primary)" }}>
-                brava
-              </span>
-            </div>
-            {loadingAuth ? null : user ? (
-              <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-muted)" }}>
-                {user.email}{" "}
-                <a href="/api/auth/logout" style={{ color: "var(--text-secondary)" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "12px 20px",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span
+              style={{
+                width: 26,
+                height: 26,
+                borderRadius: 6,
+                background: "var(--bg-accent)",
+                display: "grid",
+                placeItems: "center",
+              }}
+            >
+              <IconHome size={15} color="#FFFFFF" stroke={2} />
+            </span>
+            <span style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 19, color: "var(--text-primary)" }}>
+              brava
+            </span>
+            <IconSettings size={14} color="var(--text-muted)" stroke={1.75} />
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            <span
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                background: "var(--bg-accent)",
+                color: "#FFFFFF",
+                fontFamily: "'Geist Mono', ui-monospace, monospace",
+                fontSize: 11,
+                letterSpacing: "0.06em",
+                padding: "5px 12px",
+                borderRadius: 999,
+              }}
+            >
+              <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#FFFFFF" }} />
+              {String(unreviewedCount).padStart(2, "0")} / REVIEW
+            </span>
+            {!loadingAuth && user && (
+              <span style={{ display: "flex", alignItems: "center", gap: 6, fontFamily: "'Geist Mono', ui-monospace, monospace", fontSize: 12, color: "var(--text-secondary)" }}>
+                {user.email}
+                <a href="/api/auth/logout" style={{ color: "var(--bg-accent)", textDecoration: "underline" }}>
                   sign out
                 </a>
               </span>
-            ) : (
-              <a
-                href="/api/auth/login"
-                style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--bg-accent)" }}
-              >
-                <IconBrandGoogle size={14} stroke={1.75} />
-                sign in
-              </a>
             )}
           </div>
+        </div>
 
+        <div style={{ display: "flex", alignItems: "center", gap: 16, padding: "0 20px 16px" }}>
           <div
             style={{
+              flex: 1,
+              maxWidth: 420,
               display: "flex",
               alignItems: "center",
               gap: 8,
-              height: 38,
-              padding: "0 12px",
+              height: 40,
+              padding: "0 14px",
               border: "1px solid var(--border)",
               borderRadius: 10,
               background: "var(--surface-1)",
@@ -371,46 +379,30 @@ export function ReviewScreen() {
             <input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="search ideas"
-              style={{
-                border: "none",
-                outline: "none",
-                background: "transparent",
-                fontSize: 14,
-                color: "var(--text-primary)",
-                width: "100%",
-              }}
+              placeholder="Search ideas..."
+              style={{ border: "none", outline: "none", background: "transparent", fontSize: 14, color: "var(--text-primary)", width: "100%" }}
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery("")}
                 aria-label="Clear search"
-                className="brava-lift"
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: 22,
-                  height: 22,
-                  borderRadius: "50%",
-                  border: "none",
-                  background: "transparent",
-                  color: "var(--text-secondary)",
-                  cursor: "pointer",
-                  flexShrink: 0,
-                }}
+                style={{ display: "flex", border: "none", background: "none", cursor: "pointer", color: "var(--text-secondary)", padding: 0 }}
               >
                 <IconX size={14} stroke={1.75} />
               </button>
             )}
           </div>
+          <span style={{ fontFamily: "'Geist Mono', ui-monospace, monospace", fontSize: 11, letterSpacing: "0.06em", color: "var(--text-secondary)", textTransform: "uppercase", whiteSpace: "nowrap" }}>
+            {ideas.length} total · {unreviewedCount} to review
+          </span>
         </div>
       </div>
 
-      <div style={{ maxWidth: 560, margin: "0 auto", padding: "16px 16px 40px" }}>
+      {/* content */}
+      <div style={{ padding: 20 }}>
         {!loadingIdeas && ideas.length === 0 && (
           <div style={{ padding: "80px 0", textAlign: "center" }}>
-            <p style={{ fontFamily: "'Instrument Serif', serif", fontSize: 18, letterSpacing: "-0.01em", color: "var(--text-primary)", margin: 0 }}>
+            <p style={{ fontFamily: "'Instrument Serif', serif", fontSize: 18, color: "var(--text-primary)", margin: 0 }}>
               No ideas captured yet.
             </p>
           </div>
@@ -418,7 +410,7 @@ export function ReviewScreen() {
 
         {!loadingIdeas && ideas.length > 0 && filteredIdeas.length === 0 && (
           <div style={{ padding: "80px 0", textAlign: "center" }}>
-            <p style={{ fontFamily: "'Instrument Serif', serif", fontSize: 18, letterSpacing: "-0.01em", color: "var(--text-primary)", margin: "0 0 6px" }}>
+            <p style={{ fontFamily: "'Instrument Serif', serif", fontSize: 18, color: "var(--text-primary)", margin: "0 0 6px" }}>
               no ideas match
             </p>
             <p style={{ fontFamily: "'Geist Mono', ui-monospace, monospace", fontSize: 11, color: "var(--text-muted)", margin: 0 }}>
@@ -427,37 +419,27 @@ export function ReviewScreen() {
           </div>
         )}
 
-        {groups.map((group) => (
-          <div key={group.label}>
-            <p
-              style={{
-                fontFamily: "'Geist Mono', ui-monospace, monospace",
-                fontSize: 10,
-                fontWeight: 500,
-                color: "var(--text-muted)",
-                margin: "20px 0 4px",
-                padding: "0 10px",
-                textTransform: "uppercase",
-                letterSpacing: "0.06em",
-              }}
-            >
-              {group.label}
-            </p>
-            {group.ideas.map((idea) => (
-              <div key={idea.id}>
-                <IdeaRow idea={idea} expanded={expandedId === idea.id} onToggle={() => handleToggleExpand(idea)} />
-                {expandedId === idea.id && (
-                  <IdeaDetailPanel
-                    idea={idea}
-                    detail={detailsById[idea.id] ?? null}
-                    onToggleReviewed={() => handleToggleReviewed(idea)}
-                    onDelete={() => handleDelete(idea)}
-                  />
-                )}
-              </div>
+        {filteredIdeas.length > 0 && (
+          <div
+            style={{
+              columnCount: 4,
+              columnGap: 2,
+            }}
+            className="brava-card-columns"
+          >
+            {filteredIdeas.map((idea) => (
+              <IdeaCard
+                key={idea.id}
+                idea={idea}
+                expanded={expandedId === idea.id}
+                detail={detailsById[idea.id] ?? null}
+                onToggle={() => handleToggleExpand(idea)}
+                onToggleReviewed={() => handleToggleReviewed(idea)}
+                onDelete={() => handleDelete(idea)}
+              />
             ))}
           </div>
-        ))}
+        )}
       </div>
     </div>
   );

@@ -69,3 +69,19 @@ body {
 .brava-lift:hover {
   transform: translateY(-2px);
 }
+
+.brava-card-columns {
+  column-count: 2;
+}
+
+@media (min-width: 900px) {
+  .brava-card-columns {
+    column-count: 3;
+  }
+}
+
+@media (min-width: 1300px) {
+  .brava-card-columns {
+    column-count: 4;
+  }
+}
